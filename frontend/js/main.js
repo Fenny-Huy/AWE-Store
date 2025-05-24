@@ -1,4 +1,5 @@
-const BASE_URL = "http://127.0.0.1:5000/api";
+const CUSTOMER_ID = "C003";
+const BASE = "http://127.0.0.1:5000/api";
 
 document.addEventListener("DOMContentLoaded", () => {
     loadProducts();
@@ -6,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function loadProducts() {
-    fetch(`${BASE_URL}/products`)
+    fetch(`${BASE}/products`)
         .then(res => res.json())
         .then(products => {
             const container = document.getElementById("product-list");
@@ -25,7 +26,7 @@ function loadProducts() {
 }
 
 function loadCart() {
-    fetch(`${BASE_URL}/cart`)
+    fetch(`${BASE}/cart/${CUSTOMER_ID}`)
         .then(res => res.json())
         .then(items => {
             const cart = document.getElementById("cart-list");
@@ -46,12 +47,10 @@ function loadCart() {
 }
 
 function addToCart(productId) {
-    fetch(`${BASE_URL}/cart/add/${productId}`, {
+    fetch(`${BASE}/cart/${CUSTOMER_ID}/add`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ quantity: 1 })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id: productId, quantity: 1 })
     })
     .then(res => {
         if (!res.ok) throw new Error("Failed to add to cart.");
