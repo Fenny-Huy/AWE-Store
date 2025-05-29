@@ -1,6 +1,8 @@
 from models.shopping_cart import ShoppingCart
 from models.order import Order
 from models.user import User
+import os
+import csv
 
 class Customer:
     def __init__(self, customer_id):
