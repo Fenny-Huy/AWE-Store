@@ -5,7 +5,7 @@ This is a starter Flask project for implementing the object-oriented design of t
 ## To Run
 
 ```bash
-pip install flask
+pip install flask flask-cors
 python main.py
 ```
 

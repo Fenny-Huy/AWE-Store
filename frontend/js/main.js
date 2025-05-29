@@ -93,3 +93,18 @@ function addToCart(productId) {
     })
     .catch(err => alert(err.message));
 }
+
+function payment(method) {
+    fetch(`${BASE}/payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            orderId: "A123",
+            customerId: "2",
+            totalCost: 199.99,
+            paymentMethod: method
+        })
+    })
+    .then(response => response.json())
+    .then(data => alert(data.message));
+}

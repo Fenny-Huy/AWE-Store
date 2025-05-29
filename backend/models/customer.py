@@ -9,11 +9,11 @@ class Customer:
         self.customer = User(customer_id)
         self.order_list = {}
 
-
     def get_cart(self):
         # each call gives a fresh ShoppingCart tied to this customer and CSV persistence
         # return ShoppingCart(self.customer_id)
-        return self.shopping_cart._load_items()
+        return self.shopping_cart
+
 
     def ordering_product(self):
         order = Order(self.customer_id, self.shopping_cart._load_items())
@@ -30,4 +30,5 @@ class Customer:
         # return selected_product
 
 customer = Customer(2)
+
 print(customer.customer.user_data["name"])

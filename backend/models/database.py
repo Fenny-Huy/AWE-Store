@@ -67,15 +67,15 @@ class Table:
                 return
         raise ValueError(f"No row found where {column} == {match_value}")
 
-        def get_row_by_column_value(self, column: str, value: str) -> dict:
-            """
-            Retrieve the first row where column == value.
-            Returns the row as a dict or None if not found.
-            """
-            for row in self.rows:
-                if row.get(column) == value:
-                    return row
-            return None
+    def get_row_by_column_value(self, column: str, value: str) -> dict:
+        """
+        Retrieve the first row where column == value.
+        Returns the row as a dict or None if not found.
+        """
+        for row in self.rows:
+            if row.get(column) == value:
+                return row
+        return None
 
     def save(self):
         with open(self.file_path, "w", newline='') as f:
@@ -92,7 +92,7 @@ class Table:
 
 
 class DatabaseManager(metaclass=SingletonMeta):
-    def __init__(self, db_path: str = os.path.join("backend", "data")):
+    def __init__(self, db_path: str = "data"):
         self.tables = {}
         self.csv_path = db_path
         os.makedirs(self.csv_path, exist_ok=True)
