@@ -25,4 +25,16 @@ NOTE = """
         - 
 
     - customer.py: Should have CustomerManager class to manage Customer object
+
+
+    ** IMPORTANT **
+    The system will:
+        1. Create an order from the cart items
+        2. Generate an invoice
+        3. Process the payment
+        4. Save all order data
+        5. Clear the cart if successful
+        6. The data is persisted in JSON files:
+            - Invoices: backend/data/invoices/INV-{order_id}.json
+            - Orders: backend/data/orders/{order_id}.json
 """
