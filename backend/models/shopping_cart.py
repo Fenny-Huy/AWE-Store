@@ -1,55 +1,86 @@
+# backend/models/shopping_cart.py
+
 import csv
 import os
+from database import Database
 
 class ShoppingCart:
-    def __init__(self, customer_id, csv_path="data/cart.csv"):
+    """
+    Each ShoppingCart is tied to one customer_id. It loads existing rows from carts.csv
+    on initialization, and writes back to carts.csv on every change.
+
+    CSV schema (carts.csv):
+      customer_id,product_id,quantity
+    """
+
+    def __init__(self, customer_id, csv_path="data/carts.csv"):
         self.customer_id = str(customer_id)
         self.csv_path = csv_path
-        self.items = self._load_items()
+        self.db = Database()
+        self.items = {}  # in-memory map: product_id -> quantity
 
-    def _load_items(self):
-        items = {}
+        # Load any existing cart rows for this customer
+        self._load_items_from_csv()
+
+    def _load_items_from_csv(self):
         if not os.path.exists(self.csv_path):
-            return items
-        with open(self.csv_path, newline='') as f:
+            return
+
+        with open(self.csv_path, newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row["customer_id"] == self.customer_id:
                     pid = row["product_id"]
                     qty = int(row["quantity"])
-                    items[pid] = items.get(pid, 0) + qty
-        return items
+                    self.items[pid] = self.items.get(pid, 0) + qty
 
-    def _save_all(self, all_rows):
-        """Overwrite cart.csv with all_rows (list of dicts)."""
-        with open(self.csv_path, "w", newline='') as f:
+    def _persist_all_rows(self, all_rows):
+        """
+        Overwrite carts.csv with all_rows, which is a list of dicts 
+        having exactly the columns: customer_id,product_id,quantity
+        """
+        with open(self.csv_path, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=["customer_id","product_id","quantity"])
             writer.writeheader()
             writer.writerows(all_rows)
 
-    def _persist(self):
-        # read existing rows, replace this customer's entries, then write all back
+    def _save_current_state(self):
+        """
+        1. Read *all* existing rows from carts.csv,
+        2. Filter out any rows belonging to this.customer_id,
+        3. Append rows for this.customer_id from self.items,
+        4. Overwrite carts.csv with this combined list.
+        """
         all_rows = []
-        # read existing
         if os.path.exists(self.csv_path):
-            with open(self.csv_path, newline='') as f:
+            with open(self.csv_path, newline="") as f:
                 all_rows = list(csv.DictReader(f))
-        # filter out this customer's rows
+
+        # Remove existing rows for this customer
         all_rows = [r for r in all_rows if r["customer_id"] != self.customer_id]
-        # append current state
+
+        # Append the “current” items for this customer
         for pid, qty in self.items.items():
             all_rows.append({
                 "customer_id": self.customer_id,
                 "product_id": pid,
                 "quantity": qty
             })
-        self._save_all(all_rows)
+
+        # Overwrite the CSV
+        self._persist_all_rows(all_rows)
 
     def add_to_cart(self, product, quantity=1):
+        """
+        Increase the quantity of product.product_id by `quantity`, then write out.
+        """
         pid = str(product.product_id)
         self.items[pid] = self.items.get(pid, 0) + int(quantity)
-        self._persist()
+        self._save_current_state()
 
     def get_cart_items(self):
-        """Return list of {"id","quantity"} dicts."""
+        """
+        Return a list of dicts like { "product_id": "...", "quantity": N } 
+        for everything in this customer's cart.
+        """
         return [{"product_id": pid, "quantity": qty} for pid, qty in self.items.items()]

@@ -1,33 +1,37 @@
-from models.shopping_cart import ShoppingCart
-from models.order import Order
-from models.user import User
+# backend/models/customer.py
 
-class Customer:
+from models.account import Account
+from database import Database
+
+class Customer(Account):
+    """
+    Customer extends Account. It must be initialized with a customer_id.
+    - First, we load the Account portion (via super().__init__).
+    - Then we load the customers table to confirm existence.
+    """
+
     def __init__(self, customer_id):
-        self.customer_id = str(customer_id)
-        self.shopping_cart = ShoppingCart(self.customer_id)
-        self.customer = User(customer_id)
-        self.order_list = {}
+        # Load "account" fields first
+        super().__init__(customer_id)
 
+        self.customer_id = str(customer_id)
+        self.db = Database()
+        self.customer_data = self.db.get_table("customers")  # list of dicts
+
+        # Verify that this customer_id exists in customers.csv
+        self.my_customer_record = None
+        for row in self.customer_data:
+            if row["customer_id"] == self.customer_id:
+                self.my_customer_record = row
+                break
+
+        if not self.my_customer_record:
+            raise ValueError(f"Customer ID '{self.customer_id}' not found in customers table")
+
+        # Now initialize a cart for this customer
+        from models.shopping_cart import ShoppingCart
+        self.shopping_cart = ShoppingCart(self.customer_id)
 
     def get_cart(self):
-        # each call gives a fresh ShoppingCart tied to this customer and CSV persistence
-        # return ShoppingCart(self.customer_id)
-        return self.shopping_cart._load_items()
-
-    def ordering_product(self):
-        order = Order(self.customer_id, self.shopping_cart._load_items())
-
-        # selected_product = []
-        # for item in self.get_cart():
-        #     is_selected = input("Order this product?")
-        #     if is_selected.lower() == "yes":
-        #         print(f"Add {item} to order list")
-        #         self.order_list[item] = 
-        #     else:
-        #         print(f"Excluded {item}")
-        
-        # return selected_product
-
-customer = Customer(2)
-print(customer.customer.user_data["name"])
+        """Return this customer's ShoppingCart instance."""
+        return self.shopping_cart
