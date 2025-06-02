@@ -2,23 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Simple Online Store</title>
+  <title>Grocery Store</title>
   <link rel="stylesheet" href="css/style.css" />
   <script defer src="js/main.js"></script>
 </head>
 <body>
-  <h1>Online Store</h1>
+  <h1>Online Grocery Store</h1>
 
+  <!-- Customer Selection -->
   <section id="customer-section">
     <label for="customer-select">Active Customer:</label>
     <select id="customer-select"></select>
   </section>
 
+  <!-- Catalogue Selection -->
   <section id="catalogue-section">
+    <label for="catalogue-select">Choose Catalogue:</label>
+    <select id="catalogue-select"></select>
+  </section>
+
+  <!-- Product Catalogue Display -->
+  <section id="product-section">
     <h2>Product Catalogue</h2>
     <div id="product-list"></div>
   </section>
 
+  <!-- Shopping Cart Display -->
   <section id="cart-section">
     <h2>Shopping Cart for <span id="current-customer"></span></h2>
     <div id="cart-list"></div>

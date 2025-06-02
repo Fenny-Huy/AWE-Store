@@ -1,29 +1,33 @@
 # backend/models/account.py
 
-from database import Database
+from models.database import DatabaseManager
+import abc
 
-class Account:
+class Account(abc.ABC):
     """
     Base class for any account. 
-    On init, it loads *all* account rows into self.account_data,
-    then finds the row matching self.account_id.
+    On init, it retrieves its own record from the 'accounts' table.
     """
 
-    def __init__(self, account_id):
+    def __init__(self, account_id: str):
         self.account_id = str(account_id)
-        self.db = Database()
-        self.account_data = self.db.get_table("accounts")  # list of dicts
+        dbm = DatabaseManager()
+        self.table = dbm.get_table("accounts")
+        if self.table is None:
+            raise ValueError("Table 'accounts' does not exist")
 
-        # Find *this* account's row
-        self.my_record = None
-        for row in self.account_data:
-            if row["account_id"] == self.account_id:
-                self.my_record = row
-                break
-
-        if not self.my_record:
+        self.my_record = self.table.get_row_by_column_value("account_id", self.account_id)
+        if self.my_record is None:
             raise ValueError(f"Account ID '{self.account_id}' not found in accounts table")
 
-        # Expose some attributes
-        self.email = self.my_record["email"]
-        self.name = self.my_record["name"]
+        # Expose attributes
+        self.email = self.my_record.get("email")
+        self.name = self.my_record.get("name")
+    
+    @abc.abstractmethod
+    def get_role(self) -> str:
+        """
+        Every concrete account subclass must implement this,
+        returning something like "customer" or "admin".
+        """
+        pass

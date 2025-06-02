@@ -1,37 +1,41 @@
 # backend/models/customer.py
 
 from models.account import Account
-from database import Database
+from models.database import DatabaseManager
+from models.shopping_cart import ShoppingCart
 
 class Customer(Account):
     """
-    Customer extends Account. It must be initialized with a customer_id.
-    - First, we load the Account portion (via super().__init__).
-    - Then we load the customers table to confirm existence.
+    Customer inherits Account. 
+    On init, it validates its own row in 'customers.csv' 
+    and then creates a ShoppingCart object for this customer_id.
     """
 
-    def __init__(self, customer_id):
-        # Load "account" fields first
+    def __init__(self, customer_id: str):
+        # First, load the Account portion (email, name, etc.)
         super().__init__(customer_id)
 
         self.customer_id = str(customer_id)
-        self.db = Database()
-        self.customer_data = self.db.get_table("customers")  # list of dicts
+        dbm = DatabaseManager()
+        self.table = dbm.get_table("customers")
+        if self.table is None:
+            raise ValueError("Table 'customers' does not exist")
 
-        # Verify that this customer_id exists in customers.csv
-        self.my_customer_record = None
-        for row in self.customer_data:
-            if row["customer_id"] == self.customer_id:
-                self.my_customer_record = row
-                break
+    
 
-        if not self.my_customer_record:
-            raise ValueError(f"Customer ID '{self.customer_id}' not found in customers table")
-
-        # Now initialize a cart for this customer
-        from models.shopping_cart import ShoppingCart
+        # Initialize this customer's cart
         self.shopping_cart = ShoppingCart(self.customer_id)
 
     def get_cart(self):
-        """Return this customer's ShoppingCart instance."""
         return self.shopping_cart
+
+    def get_role(self) -> str:
+        """
+        Every concrete account subclass must implement this,
+        returning something like "customer" or "admin".
+        """
+        return "customer"
+
+    def get_customer_id(self) -> str:
+        """Return this customer's ID (the same as account_id)."""
+        return self.customer_id

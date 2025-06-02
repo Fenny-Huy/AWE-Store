@@ -2,19 +2,17 @@
 
 class Product:
     """
-    Simple Product class. No DB calls here; it just stores values given by ProductCatalogue.
+    Simple in-memory representation of a product.
+    Instances are constructed by ProductCatalogue from table rows.
     """
 
-    def __init__(self, product_id, name, description, price):
+    def __init__(self, product_id: str, name: str, description: str, price: float):
         self.product_id = str(product_id)
         self.name = name
         self.description = description
         self.price = float(price)
 
-    def to_dict(self):
-        """
-        Return a JSON-serializable representation for the frontend.
-        """
+    def return_info(self):
         return {
             "product_id": self.product_id,
             "name": self.name,

@@ -1,86 +1,71 @@
 # backend/models/shopping_cart.py
 
-import csv
 import os
-from database import Database
+from models.database import DatabaseManager
 
 class ShoppingCart:
     """
-    Each ShoppingCart is tied to one customer_id. It loads existing rows from carts.csv
-    on initialization, and writes back to carts.csv on every change.
-
-    CSV schema (carts.csv):
-      customer_id,product_id,quantity
+    Each ShoppingCart is tied to a single customer_id. 
+    Internally, the cart is stored in 'carts.csv' with columns:
+      [customer_id, product_id, quantity]
+    We load all rows for this customer, keep them in-memory (dict),
+    and on each change we write back the entire 'carts.csv' 
+    so that other customers’ rows remain intact.
     """
 
-    def __init__(self, customer_id, csv_path="data/carts.csv"):
+    def __init__(self, customer_id: str):
         self.customer_id = str(customer_id)
-        self.csv_path = csv_path
-        self.db = Database()
-        self.items = {}  # in-memory map: product_id -> quantity
+        dbm = DatabaseManager()
+        # Ensure the 'carts' table exists with the correct columns
+        self.table = dbm.get_table("carts")
+        if self.table is None:
+            # If the CSV doesn’t exist yet, create it with these columns:
+            self.table = dbm.create_table("carts", ["customer_id", "product_id", "quantity"])
 
-        # Load any existing cart rows for this customer
-        self._load_items_from_csv()
+        # Build an in-memory map: product_id -> quantity
+        self.items = {}
+        for row in self.table.rows:
+            if row["customer_id"] == self.customer_id:
+                pid = row["product_id"]
+                qty = int(row["quantity"])
+                self.items[pid] = self.items.get(pid, 0) + qty
 
-    def _load_items_from_csv(self):
-        if not os.path.exists(self.csv_path):
-            return
-
-        with open(self.csv_path, newline="") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row["customer_id"] == self.customer_id:
-                    pid = row["product_id"]
-                    qty = int(row["quantity"])
-                    self.items[pid] = self.items.get(pid, 0) + qty
-
-    def _persist_all_rows(self, all_rows):
+    def _persist_all_rows(self):
         """
-        Overwrite carts.csv with all_rows, which is a list of dicts 
-        having exactly the columns: customer_id,product_id,quantity
-        """
-        with open(self.csv_path, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=["customer_id","product_id","quantity"])
-            writer.writeheader()
-            writer.writerows(all_rows)
-
-    def _save_current_state(self):
-        """
-        1. Read *all* existing rows from carts.csv,
-        2. Filter out any rows belonging to this.customer_id,
-        3. Append rows for this.customer_id from self.items,
-        4. Overwrite carts.csv with this combined list.
+        Overwrite 'carts.csv' so that:
+        1) Rows belonging to other customers remain as-is.
+        2) Rows for self.customer_id reflect self.items (one row per product_id).
         """
         all_rows = []
-        if os.path.exists(self.csv_path):
-            with open(self.csv_path, newline="") as f:
-                all_rows = list(csv.DictReader(f))
+        # Collect rows for OTHER customers
+        for row in self.table.rows:
+            if row["customer_id"] != self.customer_id:
+                all_rows.append(row)
 
-        # Remove existing rows for this customer
-        all_rows = [r for r in all_rows if r["customer_id"] != self.customer_id]
-
-        # Append the “current” items for this customer
+        # Add this customer's current rows
         for pid, qty in self.items.items():
             all_rows.append({
                 "customer_id": self.customer_id,
                 "product_id": pid,
-                "quantity": qty
+                "quantity": str(qty)
             })
 
-        # Overwrite the CSV
-        self._persist_all_rows(all_rows)
+        # Replace the table’s in-memory rows and save
+        self.table.rows = all_rows
+        self.table.save()
 
     def add_to_cart(self, product, quantity=1):
         """
-        Increase the quantity of product.product_id by `quantity`, then write out.
+        Increase quantity for product.product_id, or add new if missing.
+        Then persist all carts back to 'carts.csv'.
         """
         pid = str(product.product_id)
         self.items[pid] = self.items.get(pid, 0) + int(quantity)
-        self._save_current_state()
+        self._persist_all_rows()
 
     def get_cart_items(self):
         """
-        Return a list of dicts like { "product_id": "...", "quantity": N } 
-        for everything in this customer's cart.
+        Return a list of dicts [{"product_id": "...", "quantity": N}, ...]
+        representing this customer's cart.
         """
         return [{"product_id": pid, "quantity": qty} for pid, qty in self.items.items()]

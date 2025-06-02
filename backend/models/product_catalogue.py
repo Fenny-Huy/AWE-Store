@@ -1,33 +1,33 @@
 # backend/models/product_catalogue.py
 
-from database import Database
-from models.product import Product
+from .product import Product
 
 class ProductCatalogue:
     """
-    On init, loads every row from products.csv and turns each into a Product object.
+    Represents a single catalogue (e.g. "Organic", "Discounted", "Dairy").
+    Each instance holds a subset of Product instances, passed in at construction.
     """
 
-    def __init__(self):
-        self.db = Database()
-        self.products = {}  # maps product_id -> Product instance
-        self._load_products()
+    def __init__(self, catalogue_id: str, name: str, product_list: list[Product]):
+        self.catalogue_id = str(catalogue_id)
+        self.name = name
+        # Map product_id -> Product instance
+        self.products = {p.product_id: p for p in product_list}
 
-    def _load_products(self):
-        rows = self.db.get_table("products")  # list of dicts
-        for row in rows:
-            p = Product(
-                product_id = row["product_id"],
-                name       = row["name"],
-                description= row["description"],
-                price      = row["price"]
-            )
-            self.products[p.product_id] = p
+    def get_catalogue_id(self) -> str:
+        return self.catalogue_id
 
-    def get_all_products(self):
-        """Return a list of dicts (for JSON) for every Product."""
-        return [p.to_dict() for p in self.products.values()]
+    def get_name(self) -> str:
+        return self.name
 
-    def get_product(self, product_id):
-        """Return the Product instance matching product_id, or None if not found."""
+    def get_all_products(self) -> list[dict]:
+        """
+        Return a JSON‐serializable list (dicts) of every Product in this catalogue.
+        """
+        return [p.return_info() for p in self.products.values()]
+
+    def get_product(self, product_id: str):
+        """
+        Return the Product instance (or None if not in this catalogue).
+        """
         return self.products.get(str(product_id))
