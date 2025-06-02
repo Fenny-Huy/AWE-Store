@@ -12,11 +12,11 @@ class Account(abc.ABC):
     def __init__(self, account_id: str):
         self.account_id = str(account_id)
         dbm = DatabaseManager()
-        self.table = dbm.get_table("accounts")
-        if self.table is None:
+        table = dbm.get_table("accounts")
+        if table is None:
             raise ValueError("Table 'accounts' does not exist")
 
-        self.my_record = self.table.get_row_by_column_value("account_id", self.account_id)
+        self.my_record = table.get_row_by_column_value("account_id", self.account_id)
         if self.my_record is None:
             raise ValueError(f"Account ID '{self.account_id}' not found in accounts table")
 

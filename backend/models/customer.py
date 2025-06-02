@@ -17,8 +17,8 @@ class Customer(Account):
 
         self.customer_id = str(customer_id)
         dbm = DatabaseManager()
-        self.table = dbm.get_table("customers")
-        if self.table is None:
+        table = dbm.get_table("customers")
+        if table is None:
             raise ValueError("Table 'customers' does not exist")
 
     

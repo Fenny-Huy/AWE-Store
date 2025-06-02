@@ -17,14 +17,14 @@ class ShoppingCart:
         self.customer_id = str(customer_id)
         dbm = DatabaseManager()
         # Ensure the 'carts' table exists with the correct columns
-        self.table = dbm.get_table("carts")
-        if self.table is None:
+        table = dbm.get_table("carts")
+        if table is None:
             # If the CSV doesn’t exist yet, create it with these columns:
-            self.table = dbm.create_table("carts", ["customer_id", "product_id", "quantity"])
+            table = dbm.create_table("carts", ["customer_id", "product_id", "quantity"])
 
         # Build an in-memory map: product_id -> quantity
         self.items = {}
-        for row in self.table.rows:
+        for row in table.rows:
             if row["customer_id"] == self.customer_id:
                 pid = row["product_id"]
                 qty = int(row["quantity"])
@@ -38,7 +38,7 @@ class ShoppingCart:
         """
         all_rows = []
         # Collect rows for OTHER customers
-        for row in self.table.rows:
+        for row in table.rows:
             if row["customer_id"] != self.customer_id:
                 all_rows.append(row)
 
@@ -51,8 +51,8 @@ class ShoppingCart:
             })
 
         # Replace the table’s in-memory rows and save
-        self.table.rows = all_rows
-        self.table.save()
+        table.rows = all_rows
+        table.save()
 
     def add_to_cart(self, product, quantity=1):
         """
