@@ -1,21 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Online Store</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script defer src="js/main.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWE Store</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script defer src="js/main.js"></script>
 </head>
 <body>
-  <h1>Online Store</h1>
+    <div class="container">
+        <header>
+            <h1>AWE Store</h1>
+            <div class="customer-section">
+                <label for="customer-select">Select Customer:</label>
+                <select id="customer-select"></select>
+            </div>
+        </header>
 
-  <label for="customer-select">Active Customer:</label>
-  <select id="customer-select"></select>
+        <div class="main-content">
+            <section class="product-section">
+                <h2>Product Catalogue</h2>
+                <div class="product-grid" id="product-list">
+                    <!-- Products will be dynamically inserted here -->
+                </div>
+            </section>
 
-  <h2>Product Catalogue</h2>
-  <div id="product-list"></div>
-
-  <h2>Shopping Cart</h2>
-  <div id="cart-list"></div>
+            <section class="cart-section">
+                <h2>Shopping Cart</h2>
+                <div id="cart-list">
+                    <!-- Cart items will be dynamically inserted here -->
+                </div>
+                <div class="cart-total">
+                    Total: $<span id="cart-total">0.00</span>
+                </div>
+                <button class="checkout-btn" id="checkout-btn">Proceed to Checkout</button>
+            </section>
+        </div>
+    </div>
 </body>
 </html>

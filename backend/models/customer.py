@@ -77,5 +77,19 @@ class Customer:
                 return order
         return None
 
-customer = Customer(2)
-print(customer.customer.user_data["name"])
+
+    def get_role(self) -> str:
+        """
+        Every concrete account subclass must implement this,
+        returning something like "customer" or "admin".
+        """
+        return "customer"
+
+    def get_customer_id(self) -> str:
+        """Return this customer's ID (the same as account_id)."""
+        return self.customer_id
+    
+
+    
+# customer = Customer(2)
+# print(customer.customer.user_data["name"])

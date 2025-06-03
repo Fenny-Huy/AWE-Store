@@ -53,3 +53,8 @@ class ShoppingCart:
     def get_cart_items(self):
         """Return list of {"id","quantity"} dicts."""
         return [{"product_id": pid, "quantity": qty} for pid, qty in self.items.items()]
+
+    def clear(self):
+        """Clear all items from the cart."""
+        self.items = {}
+        self._persist()
