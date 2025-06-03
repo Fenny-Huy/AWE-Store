@@ -93,3 +93,8 @@ function addToCart(productId) {
     })
     .catch(err => alert(err.message));
 }
+
+function goToCheckout() {
+    const customerId = document.getElementById("customer-select").value;
+    window.location.href = `checkout.html?customer_id=${customerId}`;
+  }

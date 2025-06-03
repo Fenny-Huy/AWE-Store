@@ -1,5 +1,5 @@
-from models.database import DatabaseManager
-# from database import DatabaseManager
+# from models.database import DatabaseManager
+from .database import DatabaseManager
 
 class User():
     def __init__(self,customer_id):

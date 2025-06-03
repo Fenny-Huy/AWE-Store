@@ -3,7 +3,10 @@ from datetime import datetime
 import os
 import json
 import uuid
-
+from models.payment_strategies.banktransfer_payment import BankTransfer
+from models.payment_strategies.creditcard_payment import CreditCard
+from models.payment_strategies.thirdparty_payment import ThirdParty
+from models.payment_observer import observer
 
 class Order:
     def __init__(self, customer, cart_items):
@@ -43,26 +46,53 @@ class Order:
         
         return self.invoice
 
-    def process_payment(self):
+    # def process_payment(self):
+    #     if not self.invoice:
+    #         self.create_invoice()
+            
+    #     payment = Payment()
+    #     payment_result = payment.process_payment({
+    #         "amount": self.total_amount,
+    #         "order_id": self.order_id,
+    #         "customer_id": self.customer.customer_id
+    #     })
+        
+    #     if payment_result.get("success"):
+    #         self.status = "paid"
+    #         self._save_order()
+    #         self._clear_cart()
+    #         return {"success": True, "message": "Payment processed successfully", "invoice": self.invoice}
+    #     else:
+    #         self.status = "payment_failed"
+    #         return {"success": False, "message": payment_result.get("error", "Payment processing failed")}
+
+    def make_payment(self, method: str):
+        method = method.lower()
         if not self.invoice:
             self.create_invoice()
-            
-        payment = Payment()
-        payment_result = payment.process_payment({
-            "amount": self.total_amount,
-            "order_id": self.order_id,
-            "customer_id": self.customer.customer_id
-        })
         
-        if payment_result.get("success"):
-            self.status = "paid"
-            self._save_order()
-            self._clear_cart()
-            return {"success": True, "message": "Payment processed successfully", "invoice": self.invoice}
+        # Select the appropriate payment strategy
+        if method == "credit":
+            payment_strategy = CreditCard()
+        elif method == "bank":
+            payment_strategy = BankTransfer()
+        elif method == "thirdparty":
+            payment_strategy = ThirdParty()
         else:
-            self.status = "payment_failed"
-            return {"success": False, "message": payment_result.get("error", "Payment processing failed")}
+            print("Error: Unsupported payment method.")
+            return False
 
+        # Process payment
+        success = payment_strategy.process_payment(self.total_cost)
+        if success:
+            self.status = "Paid"
+            print(f"Order {self.order_id} marked as paid.")
+            observer.notify_all(self.order_id)
+            return True
+        else:
+            print("Payment failed.")
+            return False
+        
     def _save_order(self):
         order_data = {
             "order_id": self.order_id,

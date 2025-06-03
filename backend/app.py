@@ -5,6 +5,16 @@ import csv
 from models.product_catalogue import ProductCatalogue
 from models.customer import Customer
 from models.product import Product
+from models.order import Order
+
+from models.payment_observer import observer
+from models.payment_listeners.receipt import Receipt
+from models.payment_listeners.notification_system import NotificationSystem
+from models.payment_listeners.shipment import Shipment
+
+observer.register(Receipt())
+observer.register(NotificationSystem())
+observer.register(Shipment())
 
 app = Flask(__name__)
 CORS(app)
@@ -57,6 +67,29 @@ def add_to_cart(customer_id):
     cust = Customer(customer_id)
     cust.get_cart().add_to_cart(product, qty)
     return jsonify({"message": "Added to cart"}), 200
+
+@app.route("/api/payment", methods=["POST"])
+def checkout():
+    data = request.get_json()
+    
+    # Extract customer info
+    customer_id = data["customerId"]
+    cust = Customer(customer_id)
+    cart_items = cust.get_cart()._load_items()
+
+    order = Order(
+        order_id=data["orderId"],
+        customer_id=customer_id,
+        items=cart_items,
+        total_cost=data["totalCost"]
+    )
+
+    success = order.make_payment(data["paymentMethod"])
+    
+    if success:
+        return jsonify({"message": "Payment successful!"})
+    else:
+        return jsonify({"message": "Payment failed."}), 400
 
 if __name__ == "__main__":
     print(app.url_map)
