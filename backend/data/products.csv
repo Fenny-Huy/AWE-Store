@@ -1,10 +1,6 @@
 product_id,name,description,price
-1,Potato,Like your pc specs,120.99
-2,Tomato,Try spelling without T,25.00
-3,Teeth,Taken directly from tooth fairy,14.50
-4,Carrot,The orange one,10.00
-5,Apple,The forbidden fruit,15.00
-6,Orange,The citrus fruit,12.00
-7,Banana,The yellow fruit,8.00
-8,Strawberry,The red fruit,20.00
-9,Blueberry,The blue fruit,18.00
+1,Bananas,Fresh bananas (per kg),2.50
+2,Organic Lettuce,Leafy green organic lettuce,3.00
+3,Milk,Whole milk (1L),1.99
+4,Eggs,Free-range eggs (dozen),4.00
+5,Cheddar Cheese,Cheddar cheese block (200g),5.50

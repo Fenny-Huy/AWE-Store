@@ -1,100 +1,209 @@
-let CUSTOMER_ID = null;
-const BASE = "http://127.0.0.1:5000/api";
+const BASE_URL = "http://127.0.0.1:5000/api";
 
-document.addEventListener("DOMContentLoaded", () => {
+let currentCustomer = null;
+let currentCatalogue = null;  // will hold the selected catalogue_id
+
+document.addEventListener("DOMContentLoaded", init);
+
+function init() {
   loadCustomers();
-});
+  loadCatalogues();
+}
 
+// ─────────────────────────────────────────────────────────────
+// 1. Load and build the “Active Customer” dropdown
+// ─────────────────────────────────────────────────────────────
 function loadCustomers() {
-  fetch(`${BASE}/customers`)
+  fetch(`${BASE_URL}/customers`)
     .then(res => res.json())
     .then(customers => {
       const select = document.getElementById("customer-select");
       select.innerHTML = "";
 
-      if (customers.length === 0) {
-        // if no carts yet, create a default guest
+      if (!Array.isArray(customers) || customers.length === 0) {
         customers = ["guest"];
       }
 
-      customers.forEach(id => {
+      customers.forEach(custId => {
         const opt = document.createElement("option");
-        opt.value = id;
-        opt.textContent = id;
+        opt.value = custId;
+        opt.textContent = custId;
         select.appendChild(opt);
       });
 
-      // set initial customer and load data
-      CUSTOMER_ID = select.value;
+      // Set initial customer
+      currentCustomer = select.value;
+      document.getElementById("current-customer").textContent = currentCustomer;
+
       select.addEventListener("change", () => {
-        CUSTOMER_ID = select.value;
+        currentCustomer = select.value;
+        document.getElementById("current-customer").textContent = currentCustomer;
         loadCart();
       });
 
-      // now load products and cart
-      loadProducts();
+      // Initial load of cart
+      loadCart();
+    })
+    .catch(err => {
+      console.error("Error loading customers:", err);
+      currentCustomer = "guest";
+      document.getElementById("current-customer").textContent = currentCustomer;
       loadCart();
     });
 }
 
+// ─────────────────────────────────────────────────────────────
+// 2. Load and build the “Choose Catalogue” dropdown
+// ─────────────────────────────────────────────────────────────
+function loadCatalogues() {
+  fetch(`${BASE_URL}/catalogues`)
+    .then(res => res.json())
+    .then(catalogues => {
+      const select = document.getElementById("catalogue-select");
+      select.innerHTML = "";
+
+      // Add an “All Products” option
+      const allOpt = document.createElement("option");
+      allOpt.value = "ALL";
+      allOpt.textContent = "All Products";
+      select.appendChild(allOpt);
+
+      // Populate with each catalogue
+      catalogues.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat.catalogue_id;
+        opt.textContent = cat.name;
+        select.appendChild(opt);
+      });
+
+      // Set initial catalogue to “All”
+      currentCatalogue = "ALL";
+
+      select.addEventListener("change", () => {
+        currentCatalogue = select.value;
+        loadProducts();
+      });
+
+      // Initial load of products
+      loadProducts();
+    })
+    .catch(err => {
+      console.error("Error loading catalogues:", err);
+      // If error, default to “All Products”
+      currentCatalogue = "ALL";
+      loadProducts();
+    });
+}
+
+// ─────────────────────────────────────────────────────────────
+// 3. Load products for the chosen catalogue (or all if “ALL”)
+// ─────────────────────────────────────────────────────────────
 function loadProducts() {
-  fetch(`${BASE}/products`)
+  let url;
+  if (currentCatalogue === "ALL") {
+    url = `${BASE_URL}/products`;
+  } else {
+    url = `${BASE_URL}/catalogues/${currentCatalogue}/products`;
+  }
+
+  fetch(url)
     .then(res => res.json())
     .then(products => {
       const container = document.getElementById("product-list");
       container.innerHTML = "";
+
+      if (!Array.isArray(products) || products.length === 0) {
+        container.innerHTML = "<p>No products available in this catalogue.</p>";
+        return;
+      }
+
       products.forEach(p => {
         const div = document.createElement("div");
         div.className = "product";
-        div.innerHTML = `
-          <strong>${p.name}</strong> - $${p.price} - productID${p.id}<br>
-          <small>${p.description}</small><br>
-          <button onclick="addToCart('${p.id}')">Add to Cart</button>
+
+        const info = document.createElement("div");
+        info.innerHTML = `
+          <strong>${p.name}</strong> – $${p.price.toFixed(2)}<br>
+          <small>${p.description}</small>
         `;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Add to Cart";
+        btn.addEventListener("click", evt => {
+          evt.preventDefault();
+          addToCart(p.product_id);
+        });
+
+        div.appendChild(info);
+        div.appendChild(btn);
         container.appendChild(div);
       });
+    })
+    .catch(err => {
+      console.error("Error loading products:", err);
+      document.getElementById("product-list").innerHTML =
+        "<p>Failed to load products.</p>";
     });
 }
 
+// ─────────────────────────────────────────────────────────────
+// 4. Load the current customer’s cart items
+// ─────────────────────────────────────────────────────────────
 function loadCart() {
-  fetch(`${BASE}/cart/${CUSTOMER_ID}`)
-    .then(res => res.json())
+  if (!currentCustomer) return;
+  fetch(`${BASE_URL}/cart/${currentCustomer}`)
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to fetch cart");
+      return res.json();
+    })
     .then(items => {
-      const cart = document.getElementById("cart-list");
-      cart.innerHTML = "";
-      if (items.length === 0) {
-        cart.innerHTML = "<em>Your cart is empty.</em>";
+      const cartDiv = document.getElementById("cart-list");
+      cartDiv.innerHTML = "";
+
+      if (!Array.isArray(items) || items.length === 0) {
+        cartDiv.innerHTML = "<p>Your cart is empty.</p>";
         return;
       }
+
       items.forEach(item => {
         const div = document.createElement("div");
         div.className = "cart-item";
         div.innerHTML = `
-          <strong>${item.name}</strong> - $${item.price} × ${item.quantity}
+          <strong>${item.name}</strong> – $${item.price.toFixed(2)} × ${item.quantity}
         `;
-        cart.appendChild(div);
+        cartDiv.appendChild(div);
       });
+    })
+    .catch(err => {
+      console.error("Error loading cart:", err);
+      document.getElementById("cart-list").innerHTML =
+        "<p>Failed to load cart.</p>";
     });
 }
 
+// ─────────────────────────────────────────────────────────────
+// 5. Add a product to the current customer’s cart
+// ─────────────────────────────────────────────────────────────
 function addToCart(productId) {
-  fetch(`${BASE}/cart/${CUSTOMER_ID}/add`, {
+  if (!currentCustomer) {
+    return alert("Please select a customer first.");
+  }
+
+  fetch(`${BASE_URL}/cart/${currentCustomer}/add`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ product_id: productId, quantity: 1 })
   })
     .then(res => {
-      if (!res.ok) throw new Error("Failed to add to cart.");
+      if (!res.ok) throw new Error("Failed to add to cart");
       return res.json();
     })
     .then(() => {
-      alert("Product added to cart!");
       loadCart();
     })
-    .catch(err => alert(err.message));
+    .catch(err => {
+      console.error("Error adding to cart:", err);
+      alert("Could not add to cart. See console for details.");
+    });
 }
-
-function goToCheckout() {
-    const customerId = document.getElementById("customer-select").value;
-    window.location.href = `checkout.html?customer_id=${customerId}`;
-  }
