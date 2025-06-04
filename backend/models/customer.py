@@ -28,7 +28,8 @@ class Customer(Account):
         self.shopping_cart = ShoppingCart(self.customer_id)
 
     def get_cart(self):
-        return ShoppingCart(self.customer_id)
+        return self.shopping_cart.get_cart_items()
+        # return ShoppingCart(self.customer_id)
 
     def get_role(self) -> str:
         """
@@ -38,27 +39,41 @@ class Customer(Account):
         return "customer"
 
 
-    def place_order(self):
+    def place_order(self, order_id: str, total_cost: float, payment_method: str = "credit"):
         """
         Create and process an order with payment
         Returns the order status and invoice information
         """
-        order = self.create_order()
-        cart_items = self.get_cart().get_cart_items()
-        # Create invoice
-        order = Order(self, cart_items)
-        # return order
-        invoice = order.create_invoice()
-        # Process payment
-        payment_result = order.process_payment()
+        # Get current cart items
+        cart = self.shopping_cart
         
-        if payment_result["success"]:
-            # Reload orders after successful payment
-            self.orders = self._load_orders()
-            print("Payment Clear Cart")
-            self.shopping_cart.clear_cart()
-            
-        return payment_result
+        # Create new order
+        order = Order(
+            order_id=order_id,
+            customer_id=self.customer_id,
+            items=cart,
+            total_cost=total_cost
+        )
+        
+        # Process payment
+        payment_success = order.make_payment(payment_method)
+        
+        if payment_success:
+            print("Payment successful")
+            # Generate invoice
+            # invoice = order.invoice
+            # Clear the cart after successful payment
+            cart.clear_cart()
+            return {
+                "success": True,
+                "invoice": order.invoice,
+                "message": "Payment successful"
+            }
+        
+        return {
+            "success": False,
+            "message": "Payment failed"
+        }
 
     def get_orders(self):
         """

@@ -198,28 +198,22 @@ def checkout():
     data = request.get_json()
     
     customer_id = data["customerId"]
+    if customer_id not in all_customers:
+        return jsonify({"message": "Customer not found"}), 404
+
     cust = all_customers[customer_id]
-    cart_items = cust.get_cart().get_cart_items()
-
-    order = Order(
-        order_id=data["orderId"],
-        customer_id=customer_id,
-        items=cart_items,
-        total_cost=data["totalCost"]
-    )
-
-    success = order.make_payment(data["paymentMethod"])
     
-    if success:
-        order_table.add_row({
-            "order_id": order.order_id,
-            "customer_id": customer_id,
-            "total_cost": order.total_cost,
-            "items": json.dumps(order.items)
-        })
-        return jsonify({"message": "Payment successful!"})
+    # Process the order using Customer's place_order method
+    result = cust.place_order(
+        order_id=data["orderId"],
+        total_cost=data["totalCost"],
+        payment_method=data.get("paymentMethod", "credit")
+    )
+    
+    if result["success"]:
+        return jsonify({"message": "Payment successful!", "invoice": result["invoice"]})
     else:
-        return jsonify({"message": "Payment failed."}), 400
+        return jsonify({"message": result["message"]}), 400
     
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -22,7 +22,9 @@ function init() {
         window.location.href = `checkout.html?customer_id=${currentCustomer}`;
       });
     }
-  }
+
+  handleCheckout();
+}
 
 // ─────────────────────────────────────────────────────────────
 // 1. Load and build the "Active Customer" dropdown
@@ -243,5 +245,28 @@ function addToCart(productId) {
     .catch(err => {
       console.error("Error adding to cart:", err);
       alert("Could not add to cart. See console for details.");
+    });
+}
+
+// ─────────────────────────────────────────────────────────────
+// 6. Handle checkout
+// ─────────────────────────────────────────────────────────────
+
+async function handleCheckout() {
+    const checkoutButton = document.getElementById('checkout-button');
+    if (!checkoutButton) return;
+
+    checkoutButton.addEventListener('click', () => {
+        // Get the current customer ID
+        const customerSelect = document.getElementById('customer-select');
+        const customerId = customerSelect.value;
+        
+        if (!customerId) {
+            alert('Please select a customer first');
+            return;
+        }
+
+        // Redirect to checkout page with customer ID
+        window.location.href = `checkout.html?customerId=${customerId}`;
     });
 }

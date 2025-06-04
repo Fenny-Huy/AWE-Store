@@ -2,106 +2,105 @@ const BASE_URL = "http://127.0.0.1:5000/api";
 
 let currentCustomer = null;
 
-document.addEventListener("DOMContentLoaded", () => {
-  const params = new URLSearchParams(window.location.search);
-  currentCustomer = params.get("customer_id");
+// Get customer ID from URL parameters
+const urlParams = new URLSearchParams(window.location.search);
+const customerId = urlParams.get('customerId');
 
-  if (!currentCustomer) {
-    alert("No customer selected.");
-    return;
-  }
-
-  document.getElementById("current-customer").textContent = currentCustomer;
-  loadCart();
+// Load customer's cart when page loads
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!customerId) {
+        alert('No customer selected');
+        goToHome();
+        return;
+    }
+    await loadCart();
 });
 
-function loadCart() {
-  fetch(`${BASE_URL}/cart/${currentCustomer}`)
-    .then(res => res.json())
-    .then(items => {
-      const cartDiv = document.getElementById("cart-list");
-      cartDiv.innerHTML = "";
-
-      if (!Array.isArray(items) || items.length === 0) {
-        cartDiv.innerHTML = "<p>Your cart is empty.</p>";
-        return;
-      }
-
-      items.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "cart-item";
-        div.innerHTML = `
-          <strong>${item.name}</strong> – $${item.price.toFixed(2)} × ${item.quantity}
-        `;
-        cartDiv.appendChild(div);
-      });
-    })
-    .catch(err => {
-      console.error("Error loading cart:", err);
-      document.getElementById("cart-list").innerHTML =
-        "<p>Failed to load cart.</p>";
-    });
-}
-
-function payment(method) {
-  const params = new URLSearchParams(window.location.search);
-  const customerId = params.get("customer_id");
-
-  if (!customerId) {
-    alert("Customer ID not found.");
-    return;
-  }
-
-  // First, fetch the cart and calculate total
-  fetch(`${BASE_URL}/cart/${customerId}`)
-    .then(res => res.json())
-    .then(cartItems => {
-      if (cartItems.length === 0) {
-        alert("Cart is empty.");
-        return;
-      }
-
-      let totalCost = 0;
-      cartItems.forEach(item => {
-        totalCost += item.price * item.quantity;
-      });
-
-      // Generate a new orderId
-      const orderId = `O${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-
-      // Now send payment request
-      return fetch(`${BASE_URL}/payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerId: customerId,
-          orderId: orderId,
-          paymentMethod: method,
-          totalCost: totalCost.toFixed(2)
-        })
-      });
-    })
-    .then(res => {
-      if (!res) return;
-      return res.json().then(data => {
-        if (res.ok) {
-          alert("Payment successful!");
-          window.location.href = "index.html";
-          loadCart();
-        } else {
-          alert("Payment failed: " + data.message);
-        }
-      });
-    })
-    .catch(err => {
-      console.error("Payment error:", err);
-      alert("Something went wrong during payment.");
-    });
-
-  
-}
-
-
+// Function to return to home page
 function goToHome() {
-  window.location.href = `index.html`;
+    window.location.href = 'index.html';
+}
+
+// Load and display cart contents
+async function loadCart() {
+    try {
+        const response = await fetch(`${BASE_URL}/cart/${customerId}`);
+        const cartItems = await response.json();
+        
+        // Display customer ID
+        document.getElementById('current-customer').textContent = `Customer ${customerId}`;
+        
+        // Calculate total
+        let total = 0;
+        const cartList = document.getElementById('cart-list');
+        cartList.innerHTML = ''; // Clear existing items
+
+        // Display cart items
+        cartItems.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            total += itemTotal;
+            
+            cartList.innerHTML += `
+                <div class="cart-item">
+                    <span>${item.name}</span>
+                    <span>$${item.price} x ${item.quantity} = $${itemTotal.toFixed(2)}</span>
+                </div>
+            `;
+        });
+
+        // Add total
+        cartList.innerHTML += `
+            <div class="cart-total">
+                <strong>Total: $${total.toFixed(2)}</strong>
+            </div>
+        `;
+
+        // Store total for payment processing
+        window.cartTotal = total;
+    } catch (error) {
+        console.error('Error loading cart:', error);
+        alert('Error loading cart. Please try again.');
+    }
+}
+
+// Handle payment
+async function payment(method) {
+    if (!customerId || !window.cartTotal) {
+        alert('Cannot process payment: Missing customer or cart information');
+        return;
+    }
+
+    try {
+        const orderId = `${Date.now()}-${customerId}`;
+        
+        const response = await fetch(`${BASE_URL}/payment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                customerId: customerId,
+                orderId: orderId,
+                totalCost: window.cartTotal,
+                paymentMethod: method
+            })
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert(`Payment successful!\nOrder ID: ${orderId}\nMethod: ${method}`);
+            // Show invoice details if available
+            if (result.invoice) {
+                console.log('Invoice:', result.invoice);
+            }
+            // Return to home page after successful payment
+            goToHome();
+        } else {
+            alert(`Payment failed: ${result.message}`);
+        }
+    } catch (error) {
+        console.error('Error processing payment:', error);
+        alert('An error occurred while processing payment. Please try again.');
+    }
 }
