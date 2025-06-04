@@ -3,6 +3,7 @@ from models.payment_strategies.creditcard_payment import CreditCard
 from models.payment_strategies.thirdparty_payment import ThirdParty
 from models.payment_observer import observer
 # from models.customer import Customer
+from datetime import datetime
 
 class Order():
     def __init__(self, order_id, customer_id, items, total_cost):
@@ -41,4 +42,15 @@ class Order():
             return False
 
     def create_invoice(self):
-        pass
+        """
+        Creates an invoice for the order containing all relevant details.
+        Returns a dictionary with order information.
+        """
+        invoice = {
+            "order_id": self.order_id,
+            "items": self.items,
+            "total_cost": self.total_cost,
+            "status": self.status,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        return invoice

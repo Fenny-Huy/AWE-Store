@@ -25,7 +25,7 @@ class Customer(Account):
     
 
         # Initialize this customer's cart
-        # self.shopping_cart = ShoppingCart(self.customer_id)
+        self.shopping_cart = ShoppingCart(self.customer_id)
 
     def get_cart(self):
         return ShoppingCart(self.customer_id)
@@ -55,7 +55,8 @@ class Customer(Account):
         if payment_result["success"]:
             # Reload orders after successful payment
             self.orders = self._load_orders()
-            self.get_cart().clear_cart()
+            print("Payment Clear Cart")
+            self.shopping_cart.clear_cart()
             
         return payment_result
 
