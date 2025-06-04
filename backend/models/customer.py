@@ -49,13 +49,13 @@ class Customer(Account):
         order = Order(self, cart_items)
         # return order
         invoice = order.create_invoice()
-        
         # Process payment
         payment_result = order.process_payment()
         
         if payment_result["success"]:
             # Reload orders after successful payment
             self.orders = self._load_orders()
+            self.get_cart().clear_cart()
             
         return payment_result
 

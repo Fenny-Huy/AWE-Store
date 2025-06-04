@@ -213,7 +213,7 @@ def checkout():
     if success:
         order_table.add_row({
             "order_id": order.order_id,
-            "customer_id": order.customer_id,
+            "customer_id": customer_id,
             "total_cost": order.total_cost,
             "items": json.dumps(order.items)
         })
