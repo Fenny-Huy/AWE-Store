@@ -1,0 +1,21 @@
+{
+  "order_id": "5380f074-4811-47ee-9723-f6d2d22f8261",
+  "customer_id": "C001",
+  "date": "2025-06-04 19:53:05",
+  "items": [
+    {
+      "product_id": "3",
+      "name": "Milk",
+      "price": 1.99,
+      "quantity": 1
+    },
+    {
+      "product_id": "5",
+      "name": "Cheddar Cheese",
+      "price": 5.5,
+      "quantity": 1
+    }
+  ],
+  "total_amount": 7.49,
+  "status": "Paid"
+}

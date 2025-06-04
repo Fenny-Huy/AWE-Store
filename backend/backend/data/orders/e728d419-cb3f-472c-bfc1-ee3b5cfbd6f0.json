@@ -1,0 +1,21 @@
+{
+  "order_id": "e728d419-cb3f-472c-bfc1-ee3b5cfbd6f0",
+  "customer_id": "C002",
+  "date": "2025-06-04 19:53:14",
+  "items": [
+    {
+      "product_id": "2",
+      "name": "Organic Lettuce",
+      "price": 3.0,
+      "quantity": 1
+    },
+    {
+      "product_id": "4",
+      "name": "Eggs",
+      "price": 4.0,
+      "quantity": 1
+    }
+  ],
+  "total_amount": 7.0,
+  "status": "Paid"
+}
