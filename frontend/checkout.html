@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Checkout</title>
   <link rel="stylesheet" href="css/style.css">
   <script defer src="js/checkout.js"></script>
@@ -8,14 +9,16 @@
 <body>
   <h1>Checkout</h1>
 
+  <!-- Return Home -->
   <button type="button" onclick="goToHome()">Home</button>
 
-  <h2 id="cart-header">Shopping Cart for: ${CUSTOMER_ID}</h2>
+  <!-- Cart Display -->
+  <h2>Shopping Cart for <span id="current-customer"></span></h2>
   <div id="cart-list"></div>
 
+  <!-- Payment Options -->
   <button type="button" onclick="payment('credit')">Pay with Credit Card</button>
   <button type="button" onclick="payment('bank')">Pay with Bank Transfer</button>
   <button type="button" onclick="payment('thirdparty')">Pay with Third Party</button>
-
 </body>
 </html>

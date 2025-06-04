@@ -1,17 +1,18 @@
-import os
 from flask      import Flask, jsonify, request
 from flask_cors import CORS
+import json
 
 from models.database           import DatabaseManager
 from models.customer           import Customer
 from models.product            import Product
 from models.product_catalogue  import ProductCatalogue
-from models.order              import Order
 
-from models.payment_observer            import observer
-from models.payment_listeners.receipt   import Receipt
+from models.order import Order
+
+from models.payment_observer import observer
+from models.payment_listeners.receipt import Receipt
 from models.payment_listeners.notification_system import NotificationSystem
-from models.payment_listeners.shipment  import Shipment
+from models.payment_listeners.shipment import Shipment
 
 observer.register(Receipt())
 observer.register(NotificationSystem())
@@ -20,12 +21,16 @@ observer.register(Shipment())
 app = Flask(__name__)
 CORS(app)
 
+
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. Load ALL Product instances from 'products.csv'
 # ─────────────────────────────────────────────────────────────────────────────
 dbm = DatabaseManager()
 prod_table = dbm.get_table("products")
 all_product_objs = []
+order_table = dbm.get_table("order")
 
 if prod_table:
     for row in prod_table.rows:
@@ -105,7 +110,8 @@ def get_all_products():
     """
     Return all products (regardless of catalogue).
     """
-    return jsonify([p.return_info() for p in all_product_objs])
+    return jsonify([p.return_info() for p in all_products_dict.values()])
+
 
 @app.route("/api/catalogues", methods=["GET"])
 def list_catalogues():
@@ -146,7 +152,10 @@ def view_cart(customer_id):
         return jsonify({ "error": f"Customer '{customer_id}' not found" }), 404
 
     cust = all_customers[customer_id]
-    raw_items = cust.get_cart().get_cart_items()
+    # raw_items = cust.get_cart().get_cart_items()
+    from models.shopping_cart import ShoppingCart
+    fresh_cart = ShoppingCart(customer_id)
+    raw_items = fresh_cart.get_cart_items()
     detailed = []
     for entry in raw_items:
         pid = entry["product_id"]
@@ -176,11 +185,45 @@ def add_to_cart(customer_id):
         return jsonify({ "error": f"Product ID '{pid}' not found" }), 404
 
     cust = all_customers[customer_id]
-    cust.get_cart().add_to_cart(all_products_dict[pid], qty)
+    # cust.get_cart().add_to_cart(all_products_dict[pid], qty)
+
+    from models.shopping_cart import ShoppingCart
+    fresh_cart = ShoppingCart(customer_id)
+    fresh_cart.add_to_cart(all_products_dict[pid], qty)
     return jsonify({ "message": "Product added to cart" }), 200
 
 
+@app.route("/api/payment", methods=["POST"])
+def checkout():
+    data = request.get_json()
+    
+    customer_id = data["customerId"]
+    cust = all_customers[customer_id]
+    cart_items = cust.get_cart().get_cart_items()
+
+    order = Order(
+        order_id=data["orderId"],
+        customer_id=customer_id,
+        items=cart_items,
+        total_cost=data["totalCost"]
+    )
+
+    success = order.make_payment(data["paymentMethod"])
+    
+    if success:
+        order_table.add_row({
+            "order_id": order.order_id,
+            "customer_id": order.customer_id,
+            "total_cost": order.total_cost,
+            "items": json.dumps(order.items)
+        })
+        return jsonify({"message": "Payment successful!"})
+    else:
+        return jsonify({"message": "Payment failed."}), 400
+    
+
 # ─────────────────────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     print("Loaded Products:", list(all_products_dict.keys()))
     print("Loaded Customers:", list(all_customers.keys()))

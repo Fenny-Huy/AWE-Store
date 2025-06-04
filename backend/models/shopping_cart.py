@@ -69,3 +69,10 @@ class ShoppingCart:
         representing this customer's cart.
         """
         return [{"product_id": pid, "quantity": qty} for pid, qty in self.items.items()]
+    
+    def clear_cart(self):
+        """
+        Remove all items from the cart and persist the change.
+        """
+        self.items = {}
+        self._persist_all_rows()

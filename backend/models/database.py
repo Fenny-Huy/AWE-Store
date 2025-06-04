@@ -107,10 +107,10 @@ class DatabaseManager(metaclass=SingletonMeta):
     Manages multiple Table instances. Ensures only one Table per CSV.
     """
 
-    def __init__(self, db_path: str = "data"):
+    def __init__(self, db_path: str = None):
         # Always compute data directory relative to this file's location
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.csv_path = os.path.join(base_dir, db_path)
+        self.csv_path = os.path.join(base_dir, "data")
         os.makedirs(self.csv_path, exist_ok=True)
 
         self.tables = {}  # name -> Table instance

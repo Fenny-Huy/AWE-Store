@@ -8,7 +8,21 @@ document.addEventListener("DOMContentLoaded", init);
 function init() {
   loadCustomers();
   loadCatalogues();
-}
+
+  // Bind checkout button
+  const checkoutBtn = document.getElementById("checkout-button");
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener("click", () => {
+        if (!currentCustomer) {
+          alert("Please select a customer before checking out.");
+          return;
+        }
+
+        // Simply redirect — do NOT create an order yet
+        window.location.href = `checkout.html?customer_id=${currentCustomer}`;
+      });
+    }
+  }
 
 // ─────────────────────────────────────────────────────────────
 // 1. Load and build the “Active Customer” dropdown
