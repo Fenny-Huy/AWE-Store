@@ -1,0 +1,17 @@
+{
+  "invoice_id": "INV-406784f1",
+  "order_id": "406784f1-2943-47cb-9138-02d5f93a3a13",
+  "date": "2025-06-04 13:16:56",
+  "customer": {
+    "id": "C001",
+    "name": "John Smith",
+    "email": "john@example.com"
+  },
+  "items": [
+    {
+      "product_id": "3",
+      "quantity": 1
+    }
+  ],
+  "total_amount": 0.0
+}

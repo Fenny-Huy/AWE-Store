@@ -49,7 +49,7 @@ class Customer(Account):
         Create a new order from the current shopping cart items
         Returns the created order object
         """
-        cart_items = self.shopping_cart._load_items()
+        cart_items = self.shopping_cart.get_cart_items()
         if not cart_items:
             raise ValueError("Shopping cart is empty")
 
@@ -104,5 +104,5 @@ class Customer(Account):
     
 
     
-customer = Customer(2)
-print(customer.customer.user_data["name"])
+# customer = Customer(2)
+# print(customer.customer.user_data["name"])

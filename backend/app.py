@@ -1,6 +1,8 @@
 import os
 from flask      import Flask, jsonify, request
 from flask_cors import CORS
+import csv
+import traceback
 
 from models.database           import DatabaseManager
 from models.customer           import Customer
@@ -18,7 +20,7 @@ observer.register(NotificationSystem())
 observer.register(Shipment())
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. Load ALL Product instances from 'products.csv'
@@ -137,7 +139,13 @@ def list_customers():
     """
     Return a sorted list of all customer IDs.
     """
-    return jsonify(sorted([cust.get_customer_id() for cust in all_customers.values()]))
+    try:
+        # Get all customer IDs from the customers table using DatabaseManager
+        customer_ids = list(all_customers.keys())
+        return jsonify(sorted(customer_ids))
+    except Exception as e:
+        print(f"Error listing customers: {str(e)}")  # Debug print
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/cart/<customer_id>", methods=["GET"])
@@ -179,6 +187,51 @@ def add_to_cart(customer_id):
     cust.get_cart().add_to_cart(all_products_dict[pid], qty)
     return jsonify({ "message": "Product added to cart" }), 200
 
+@app.route("/api/checkout/<customer_id>", methods=["POST"])
+def checkout(customer_id):
+    print(f"Starting checkout for customer: {customer_id}")  # Debug print
+    try:
+        # Get the customer from our existing customers
+        if customer_id not in all_customers:
+            return jsonify({"error": f"Customer '{customer_id}' not found"}), 404
+            
+        customer = all_customers[customer_id]
+        print(f"Customer object retrieved")  # Debug print
+        
+        # Get cart items before checkout
+        cart_items = customer.get_cart().get_cart_items()
+        print(f"Current cart items: {cart_items}")  # Debug print
+        
+        if not cart_items:
+            return jsonify({"error": "Cart is empty"}), 400
+        
+        # Create and process the order
+        try:
+            order_result = customer.place_order()
+            print(f"Order result: {order_result}")  # Debug print
+            
+            if order_result.get("success", False):
+                return jsonify({
+                    "message": "Checkout successful",
+                    "order_id": order_result.get("order_id")
+                }), 200
+            else:
+                error_msg = order_result.get("message", "Unknown error")
+                print(f"Checkout failed: {error_msg}")  # Debug print
+                return jsonify({
+                    "error": "Checkout failed",
+                    "reason": error_msg
+                }), 400
+                
+        except Exception as e:
+            print(f"Error during place_order: {str(e)}")
+            print(f"Traceback: {traceback.format_exc()}")
+            raise
+            
+    except Exception as e:
+        print(f"Unexpected error during checkout: {str(e)}")  # Debug print
+        print(f"Traceback: {traceback.format_exc()}")  # Debug print
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":

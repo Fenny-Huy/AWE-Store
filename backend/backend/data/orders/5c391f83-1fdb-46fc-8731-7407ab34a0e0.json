@@ -1,0 +1,15 @@
+{
+  "order_id": "5c391f83-1fdb-46fc-8731-7407ab34a0e0",
+  "customer_id": "C001",
+  "date": "2025-06-04 13:17:58",
+  "items": [
+    {
+      "product_id": "2",
+      "name": "Organic Lettuce",
+      "price": 3.0,
+      "quantity": 1
+    }
+  ],
+  "total_amount": 3.0,
+  "status": "Paid"
+}
