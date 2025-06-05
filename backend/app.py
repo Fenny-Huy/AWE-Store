@@ -7,6 +7,9 @@ from models.customer           import Customer
 from models.product            import Product
 from models.product_catalogue  import ProductCatalogue
 
+from models.admin              import Admin
+from models.sales_analytics    import SalesAnalytics
+
 from models.order import Order
 
 from models.payment_observer import observer
@@ -215,6 +218,21 @@ def checkout():
         return jsonify({"message": "Payment successful!", "invoice": result["invoice"]})
     else:
         return jsonify({"message": result["message"]}), 400
+
+
+
+
+@app.route("/api/admin/sales", methods=["GET"])
+def get_sales_summary():
+    """
+    Return a JSON object containing:
+      - total_revenue
+      - total_orders
+      - product_sales: { product_id: total_quantity_sold }
+    """
+    analytics = SalesAnalytics()
+    summary = analytics.generate_summary()
+    return jsonify(summary), 200
     
 
 # ─────────────────────────────────────────────────────────────────────────────
