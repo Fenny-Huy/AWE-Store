@@ -200,3 +200,93 @@ button:hover {
 .admin-login-button {
   margin-top: 30px;
 }
+
+
+
+/* Summary Section */
+#summary-section {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  max-width: 400px;
+  margin: 0 auto 20px auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+#summary-section div {
+  font-size: 1.1em;
+  margin: 8px 0;
+}
+
+/* Product Sales Table */
+#product-sales-section {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Table container to allow horizontal scrolling on small screens */
+#product-sales-section {
+  overflow-x: auto;
+}
+
+/* Table styling */
+#product-sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.95em;
+}
+
+#product-sales-table th,
+#product-sales-table td {
+  border: 1px solid #ddd;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+#product-sales-table th {
+  background-color: #f0f0f0;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Zebra striping for rows */
+#product-sales-table tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+#product-sales-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Empty-state row style */
+#product-sales-table tr td em {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Logout button */
+#logout-button {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s ease;
+}
+
+#logout-button:hover {
+  background-color: #c9302c;
+}
+
+#logout-button:active {
+  background-color: #ac2925;
+}
