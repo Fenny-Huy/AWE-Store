@@ -79,28 +79,7 @@ class Customer(Account):
             "message": "Payment failed"
         }
 
-    def get_orders(self):
-        """
-        Get all orders for this customer
-        """
-        return self.orders
 
-    def get_order_by_id(self, order_id):
-        """
-        Get a specific order by its ID
-        """
-        for order in self.orders:
-            if order["order_id"] == order_id:
-                return order
-        return None
-
-
-    def get_role(self) -> str:
-        """
-        Every concrete account subclass must implement this,
-        returning something like "customer" or "admin".
-        """
-        return "customer"
 
     def get_customer_id(self) -> str:
         """Return this customer's ID (the same as account_id)."""
