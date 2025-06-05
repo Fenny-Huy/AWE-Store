@@ -5,9 +5,9 @@ import csv
 from threading import Lock
 
 class SingletonMeta(type):
-    """
-    A thread-safe implementation of Singleton.
-    """
+    
+    #A thread-safe implementation of Singleton.
+    
     _instances = {}
     _lock: Lock = Lock()
 
@@ -19,9 +19,9 @@ class SingletonMeta(type):
 
 
 class Table:
-    """
-    Represents a CSV-backed table.
-    """
+    
+    #Represents a CSV-backed table.
+    
 
     def __init__(self, name: str, columns: list, path: str):
         self.name = name
@@ -103,9 +103,9 @@ class Table:
 
 
 class DatabaseManager(metaclass=SingletonMeta):
-    """
-    Manages multiple Table instances. Ensures only one Table per CSV.
-    """
+    
+    #Manages multiple Table instances. Ensures only one Table per CSV.
+    
 
     def __init__(self, db_path: str = None):
         # Always compute data directory relative to this file's location

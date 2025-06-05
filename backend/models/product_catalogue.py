@@ -3,10 +3,8 @@
 from .product import Product
 
 class ProductCatalogue:
-    """
-    Represents a single catalogue (e.g. "Organic", "Discounted", "Dairy").
-    Each instance holds a subset of Product instances, passed in at construction.
-    """
+    #Represents a single catalogue (e.g. "Organic", "Discounted", "Dairy").
+    #Each instance holds a subset of Product instances, passed in at construction.
 
     def __init__(self, catalogue_id: str, name: str, product_list: list[Product]):
         self.catalogue_id = str(catalogue_id)
@@ -21,13 +19,10 @@ class ProductCatalogue:
         return self.name
 
     def get_all_products(self) -> list[dict]:
-        """
-        Return a JSON‐serializable list (dicts) of every Product in this catalogue.
-        """
+        #Return a JSON‐serializable list (dicts) of every Product in this catalogue.
         return [p.return_info() for p in self.products.values()]
 
     def get_product(self, product_id: str):
-        """
-        Return the Product instance (or None if not in this catalogue).
-        """
+        
+        #Return the Product instance (or None if not in this catalogue).
         return self.products.get(str(product_id))

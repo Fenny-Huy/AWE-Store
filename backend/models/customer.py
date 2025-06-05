@@ -6,11 +6,11 @@ from models.shopping_cart import ShoppingCart
 from models.order import Order
 
 class Customer(Account):
-    """
-    Customer inherits Account. 
-    On init, it validates its own row in 'customers.csv' 
-    and then creates a ShoppingCart object for this customer_id.
-    """
+    
+    #Customer inherits Account. 
+    #On init, it validates its own row in 'customers.csv' and then creates a ShoppingCart object for this customer_id.
+    
+    
 
     def __init__(self, customer_id: str):
         # First, load the Account portion (email, name, etc.)
@@ -32,21 +32,17 @@ class Customer(Account):
     def get_cart(self):
         self.shopping_cart.reload_cart()
         return self.shopping_cart
-        # return ShoppingCart(self.customer_id)
+        
 
     def get_role(self) -> str:
-        """
-        Every concrete account subclass must implement this,
-        returning something like "customer" or "admin".
-        """
         return "customer"
 
 
     def place_order(self, order_id: str, total_cost: float, payment_method: str = "credit"):
-        """
-        Create and process an order with payment
-        Returns the order status and invoice information
-        """
+        
+        #Create and process an order with payment
+        #Returns the order status and invoice information
+        
         # Get current cart items
         cart = self.shopping_cart
         
@@ -82,10 +78,8 @@ class Customer(Account):
 
 
     def get_customer_id(self) -> str:
-        """Return this customer's ID (the same as account_id)."""
         return self.customer_id
     
 
     
-# customer = Customer(2)
-# print(customer.customer.user_data["name"])
+

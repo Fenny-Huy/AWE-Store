@@ -18,10 +18,10 @@ class Order():
         self.dbm = DatabaseManager()
 
     def save_order(self) -> bool:
-        """
-        Saves the order to the database.
-        Returns True if successful, False otherwise.
-        """
+        
+        #Saves the order to the database.
+        #Returns True if successful, False otherwise.
+        
         print(f"Saving order: {self.order_id}")
         try:
             order_table = self.dbm.get_table("order")
@@ -44,10 +44,10 @@ class Order():
             return False
 
     def make_payment(self, payment_method: str, payment_details: dict = None):
-        """
-        Process payment using the specified payment method.
-        payment_method should be one of: 'credit', 'bank', 'thirdparty'
-        """
+        
+        #Process payment using the specified payment method.
+        #payment_method should be one of: 'credit', 'bank', 'thirdparty'
+        
         if self.invoice is None:
             self.create_invoice()
 
@@ -87,10 +87,10 @@ class Order():
             return False
 
     def create_invoice(self):
-        """
-        Creates an invoice for the order containing all relevant details.
-        Returns a dictionary with order information.
-        """
+        
+        #Creates an invoice for the order containing all relevant details.
+        #Returns a dictionary with order information.
+        
         invoice = {
             "order_id": self.order_id,
             "customer_id": self.customer_id,

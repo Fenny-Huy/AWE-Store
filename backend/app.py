@@ -131,18 +131,18 @@ for cat_id, info in catalogue_map.items():
 
 @app.route("/api/products", methods=["GET"])
 def get_all_products():
-    """
-    Return all products (regardless of catalogue).
-    """
+    
+    #Return all products (regardless of catalogue).
+    
     return jsonify([p.return_info() for p in all_products_dict.values()])
 
 
 @app.route("/api/catalogues", methods=["GET"])
 def list_catalogues():
-    """
-    Return a list of all catalogues with their IDs and names:
-      [ { "catalogue_id": "1", "name": "Organic" }, ... ]
-    """
+    
+    #Return a list of all catalogues with their IDs and names:[ { "catalogue_id": "1", "name": "Organic" }, ... ]
+      
+    
     result = [
         { "catalogue_id": cat.get_catalogue_id(), "name": cat.get_name() }
         for cat in all_catalogues.values()
@@ -152,9 +152,9 @@ def list_catalogues():
 
 @app.route("/api/catalogues/<catalogue_id>/products", methods=["GET"])
 def get_catalogue_products(catalogue_id):
-    """
-    Return all products belonging to the given catalogue_id.
-    """
+    
+    #Return all products belonging to the given catalogue_id.
+    
     if catalogue_id not in all_catalogues:
         return jsonify({ "error": f"Catalogue '{catalogue_id}' not found" }), 404
 
@@ -164,9 +164,9 @@ def get_catalogue_products(catalogue_id):
 
 @app.route("/api/customers", methods=["GET"])
 def list_customers():
-    """
-    Return a sorted list of all customer IDs.
-    """
+    
+    #Return a sorted list of all customer IDs.
+    
     return jsonify(sorted([cust.get_customer_id() for cust in all_customers.values()]))
 
 
@@ -248,10 +248,10 @@ def checkout():
 
 @app.route("/api/admin/login", methods=["POST"])
 def admin_login():
-    """
-    Body: { "email": "...", "password": "..." }
-    Check against instantiated Admin objects in all_admins.
-    """
+    
+    #Body: { "email": "...", "password": "..." }. Check against instantiated Admin objects in all_admins.
+    
+    
     data = request.get_json()
     if not data or "email" not in data or "password" not in data:
         return jsonify({ "error": "Missing email or password" }), 400

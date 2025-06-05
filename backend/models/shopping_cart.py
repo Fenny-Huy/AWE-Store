@@ -4,14 +4,6 @@ import os
 from models.database import DatabaseManager
 
 class ShoppingCart:
-    """
-    Each ShoppingCart is tied to a single customer_id. 
-    Internally, the cart is stored in 'carts.csv' with columns:
-      [customer_id, product_id, quantity]
-    We load all rows for this customer, keep them in-memory (dict),
-    and on each change we write back the entire 'carts.csv' 
-    so that other customers’ rows remain intact.
-    """
 
     def __init__(self, customer_id: str):
         self.customer_id = str(customer_id)
@@ -31,11 +23,11 @@ class ShoppingCart:
                 self.items[pid] = self.items.get(pid, 0) + qty
 
     def _persist_all_rows(self):
-        """
-        Overwrite 'carts.csv' so that:
-        1) Rows belonging to other customers remain as-is.
-        2) Rows for self.customer_id reflect self.items (one row per product_id).
-        """
+        
+        #Overwrite 'carts.csv' so that:
+        #1) Rows belonging to other customers remain as-is.
+        #2) Rows for self.customer_id reflect self.items (one row per product_id).
+        
         all_rows = []
         # Collect rows for OTHER customers
         for row in self.table.rows:
@@ -55,32 +47,32 @@ class ShoppingCart:
         self.table.save()
 
     def add_to_cart(self, product, quantity=1):
-        """
-        Increase quantity for product.product_id, or add new if missing.
-        Then persist all carts back to 'carts.csv'.
-        """
+        
+        #Increase quantity for product.product_id, or add new if missing.
+        #Then persist all carts back to 'carts.csv'.
+        
         pid = str(product.product_id)
         self.items[pid] = self.items.get(pid, 0) + int(quantity)
         self._persist_all_rows()
 
     def get_cart_items(self):
-        """
-        Return a list of dicts [{"product_id": "...", "quantity": N}, ...]
-        representing this customer's cart.
-        """
+        
+        #Return a list of dicts [{"product_id": "...", "quantity": N}, ...]
+        #representing this customer's cart.
+        
         return [{"product_id": pid, "quantity": qty} for pid, qty in self.items.items()]
     
     def clear_cart(self):
-        """
-        Remove all items from the cart and persist the change.
-        """
+        
+        #Remove all items from the cart and persist the change.
+        
         self.items = {}
         self._persist_all_rows()
 
     def reload_cart(self):
-        """
-        Reload the cart from the database to ensure we have the latest state.
-        """
+        
+        #Reload the cart from the database to ensure we have the latest state.
+        
         self.items = {}
         for row in self.table.rows:
             if row["customer_id"] == self.customer_id:

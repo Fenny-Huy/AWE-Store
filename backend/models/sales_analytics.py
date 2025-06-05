@@ -4,12 +4,12 @@ import json
 from .database import DatabaseManager
 
 class SalesAnalytics:
-    """
-    Reads the 'order' table (backed by order.csv) and computes:
-      - total_revenue
-      - total_orders
-      - product_sales: { product_id: total_quantity_sold }
-    """
+    
+    #Reads the 'order' table (backed by order.csv) and computes:
+    #  - total_revenue
+    #  - total_orders
+    #  - product_sales: { product_id: total_quantity_sold }
+    
 
     def __init__(self):
         dbm = DatabaseManager()

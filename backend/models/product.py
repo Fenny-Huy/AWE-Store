@@ -1,10 +1,10 @@
 # backend/models/product.py
 
 class Product:
-    """
-    Simple in-memory representation of a product.
-    Instances are constructed by ProductCatalogue from table rows.
-    """
+    
+    #Simple in-memory representation of a product.
+    #Instances are constructed by ProductCatalogue from table rows.
+    
 
     def __init__(self, product_id: str, name: str, description: str, price: float):
         self.product_id = str(product_id)

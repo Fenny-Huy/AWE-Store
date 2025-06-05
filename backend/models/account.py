@@ -4,10 +4,8 @@ from models.database import DatabaseManager
 import abc
 
 class Account(abc.ABC):
-    """
-    Base class for any account. 
-    On init, it retrieves its own record from the 'accounts' table.
-    """
+    # Base class for any account.
+    # On init, it retrieves its own record from the 'accounts' table.
 
     def __init__(self, account_id: str):
         self.account_id = str(account_id)
@@ -26,8 +24,6 @@ class Account(abc.ABC):
     
     @abc.abstractmethod
     def get_role(self) -> str:
-        """
-        Every concrete account subclass must implement this,
-        returning something like "customer" or "admin".
-        """
+        # Every concrete account subclass must implement this,
+        # returning something like "customer" or "admin".
         pass
