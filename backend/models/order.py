@@ -15,20 +15,21 @@ class Order():
         self.total_cost = total_cost
         self.invoice = None
         self.status = "Pending"
-        self.dbm = DatabaseManager()
+        
 
     def save_order(self) -> bool:
+        dbm = DatabaseManager()
         
         #Saves the order to the database.
         #Returns True if successful, False otherwise.
         
         print(f"Saving order: {self.order_id}")
         try:
-            order_table = self.dbm.get_table("order")
+            order_table = dbm.get_table("order")
             if not order_table:
                 # Create order table if it doesn't exist
                 print("Creating order table")
-                order_table = self.dbm.create_table("order", ["order_id", "customer_id", "total_cost", "items", "status"])
+                order_table = dbm.create_table("order", ["order_id", "customer_id", "total_cost", "items", "status"])
             
             # Save order data
             order_table.add_row({
