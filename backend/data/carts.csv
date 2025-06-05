@@ -1,5 +1,3 @@
 customer_id,product_id,quantity
-C002,2,2
+C002,2,1
 C002,5,1
-C002,1,1
-C002,4,1

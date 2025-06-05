@@ -76,3 +76,14 @@ class ShoppingCart:
         """
         self.items = {}
         self._persist_all_rows()
+
+    def reload_cart(self):
+        """
+        Reload the cart from the database to ensure we have the latest state.
+        """
+        self.items = {}
+        for row in self.table.rows:
+            if row["customer_id"] == self.customer_id:
+                pid = row["product_id"]
+                qty = int(row["quantity"])
+                self.items[pid] = self.items.get(pid, 0) + qty

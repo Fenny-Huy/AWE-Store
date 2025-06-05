@@ -202,6 +202,7 @@ def checkout():
         return jsonify({"message": "Customer not found"}), 404
 
     cust = all_customers[customer_id]
+    print(f"current items in cart: {cust.get_cart()}")
     
     # Process the order using Customer's place_order method
     result = cust.place_order(

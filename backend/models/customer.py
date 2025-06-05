@@ -26,8 +26,11 @@ class Customer(Account):
 
         # Initialize this customer's cart
         self.shopping_cart = ShoppingCart(self.customer_id)
+        print(f"Initialized shopping cart for customer {self.customer_id} with items: {self.shopping_cart.get_cart_items()}")
+        
 
     def get_cart(self):
+        self.shopping_cart.reload_cart()
         return self.shopping_cart.get_cart_items()
         # return ShoppingCart(self.customer_id)
 
@@ -54,6 +57,7 @@ class Customer(Account):
             items=cart,
             total_cost=total_cost
         )
+        print(f"Cart items when place order: {cart.get_cart_items()}")
         
         # Process payment
         payment_success = order.make_payment(payment_method)
