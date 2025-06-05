@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Admin – Sales Analytics</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css" />
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const loggedIn = localStorage.getItem("isAdminLoggedIn");
+      if (loggedIn !== "true") {
+        // Not logged in → go back to login page
+        window.location.href = "login.html";
+      }
+    });
+  </script>
   <script defer src="js/admin.js"></script>
 </head>
 <body>
@@ -26,9 +35,15 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Filled in by JS -->
+        <!-- Rows inserted by admin.js -->
       </tbody>
     </table>
   </section>
+
+  <p>
+    <button id="logout-button" style="margin-top:1em;">
+      Log Out
+    </button>
+  </p>
 </body>
 </html>

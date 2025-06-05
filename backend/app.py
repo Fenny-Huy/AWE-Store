@@ -69,9 +69,29 @@ if cust_table:
 else:
     dbm.create_table("customers", ["customer_id","account_id"])
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 3. Load ADMIN instances from 'admins.csv'
+# ─────────────────────────────────────────────────────────────────────────────
+admins_table = dbm.get_table("admins")
+all_admins = {}  # map email -> Admin instance
+
+if admins_table:
+    for row in admins_table.rows:
+        acct_id = row["account_id"]
+        pwd     = row["password"]
+        try:
+            admin_obj = Admin(acct_id, pwd)       # loads name, email from accounts.csv
+            all_admins[admin_obj.email] = admin_obj
+        except ValueError:
+            # Skip if account_id not found in accounts.csv 
+            pass
+else:
+    # If no 'admins.csv', create an empty one with the correct header
+    dbm.create_table("admins", ["account_id","email","password"])
+
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. Load PRODUCT_CATALOGUE instances from 'product_catalogues.csv'
+# 4. Load PRODUCT_CATALOGUE instances from 'product_catalogues.csv'
 # ─────────────────────────────────────────────────────────────────────────────
 pc_table = dbm.get_table("product_catalogues")
 # Map of catalogue_id -> {"name": <str>, "product_ids": [ ... ]}
@@ -105,7 +125,7 @@ for cat_id, info in catalogue_map.items():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. API ROUTES
+# 5. API ROUTES
 # ─────────────────────────────────────────────────────────────────────────────
 
 @app.route("/api/products", methods=["GET"])
@@ -220,16 +240,29 @@ def checkout():
         return jsonify({"message": result["message"]}), 400
 
 
+@app.route("/api/admin/login", methods=["POST"])
+def admin_login():
+    """
+    Body: { "email": "...", "password": "..." }
+    Check against instantiated Admin objects in all_admins.
+    """
+    data = request.get_json()
+    if not data or "email" not in data or "password" not in data:
+        return jsonify({ "error": "Missing email or password" }), 400
+
+    email = data["email"]
+    pwd   = data["password"]
+
+    # Look up that email in our in-memory admin dictionary
+    admin_obj = all_admins.get(email)
+    if not admin_obj or not admin_obj.check_password(pwd):
+        return jsonify({ "error": "Invalid credentials" }), 401
+
+    return jsonify({ "message": "Login successful" }), 200
 
 
 @app.route("/api/admin/sales", methods=["GET"])
 def get_sales_summary():
-    """
-    Return a JSON object containing:
-      - total_revenue
-      - total_orders
-      - product_sales: { product_id: total_quantity_sold }
-    """
     analytics = SalesAnalytics()
     summary = analytics.generate_summary()
     return jsonify(summary), 200

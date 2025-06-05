@@ -1,24 +1,26 @@
 # backend/models/admin.py
 
 from .account import Account
-from .sales_analytics import SalesAnalytics
+from .database import DatabaseManager
+
 
 class Admin(Account):
     """
     Concrete Admin class. Inherits from Account.
-    Provides a method to view sales analytics.
+    Stores its own password (from admins.csv) and provides a check_password method.
     """
 
-    def __init__(self, admin_id: str):
-        super().__init__(admin_id)
-        # You might validate that this ID truly is an admin in a real system.
+    def __init__(self, account_id: str, password: str):
+        # Load basic info (account_id, email, name) from accounts.csv via Account
+        super().__init__(account_id)
+        # Override or set the password from admins.csv
+        self.password = password
 
     def get_role(self) -> str:
         return "admin"
 
-    def view_sales(self) -> dict:
+    def check_password(self, raw_password: str) -> bool:
         """
-        Return whatever SalesAnalytics.generate_summary() produces.
+        Return True if raw_password matches the stored password.
         """
-        analytics = SalesAnalytics()
-        return analytics.generate_summary()
+        return raw_password == self.password
