@@ -3,6 +3,7 @@
 from models.account import Account
 from models.database import DatabaseManager
 from models.shopping_cart import ShoppingCart
+from models.order import Order
 
 class Customer(Account):
     """
@@ -25,9 +26,74 @@ class Customer(Account):
 
         # Initialize this customer's cart
         self.shopping_cart = ShoppingCart(self.customer_id)
+        print(f"Initialized shopping cart for customer {self.customer_id} with items: {self.shopping_cart.get_cart_items()}")
+        
 
     def get_cart(self):
-        return self.shopping_cart
+        self.shopping_cart.reload_cart()
+        return self.shopping_cart.get_cart_items()
+        # return ShoppingCart(self.customer_id)
+
+    def get_role(self) -> str:
+        """
+        Every concrete account subclass must implement this,
+        returning something like "customer" or "admin".
+        """
+        return "customer"
+
+
+    def place_order(self, order_id: str, total_cost: float, payment_method: str = "credit"):
+        """
+        Create and process an order with payment
+        Returns the order status and invoice information
+        """
+        # Get current cart items
+        cart = self.shopping_cart
+        
+        # Create new order
+        order = Order(
+            order_id=order_id,
+            customer_id=self.customer_id,
+            items=cart,
+            total_cost=total_cost
+        )
+        print(f"Cart items when place order: {cart.get_cart_items()}")
+        
+        # Process payment
+        payment_success = order.make_payment(payment_method)
+        
+        if payment_success:
+            print("Payment successful")
+            # Generate invoice
+            # invoice = order.invoice
+            # Clear the cart after successful payment
+            cart.clear_cart()
+            return {
+                "success": True,
+                "invoice": order.invoice,
+                "message": "Payment successful"
+            }
+        
+        return {
+            "success": False,
+            "message": "Payment failed"
+        }
+
+    def get_orders(self):
+        """
+        Get all orders for this customer
+        """
+        return self.orders
+
+    def get_order_by_id(self, order_id):
+        """
+        Get a specific order by its ID
+        """
+        for order in self.orders:
+            if order["order_id"] == order_id:
+                return order
+        return None
+
 
     def get_role(self) -> str:
         """
@@ -39,3 +105,8 @@ class Customer(Account):
     def get_customer_id(self) -> str:
         """Return this customer's ID (the same as account_id)."""
         return self.customer_id
+    
+
+    
+# customer = Customer(2)
+# print(customer.customer.user_data["name"])

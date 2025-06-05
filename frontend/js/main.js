@@ -9,23 +9,11 @@ function init() {
   loadCustomers();
   loadCatalogues();
 
-  // Bind checkout button
-  const checkoutBtn = document.getElementById("checkout-button");
-    if (checkoutBtn) {
-      checkoutBtn.addEventListener("click", () => {
-        if (!currentCustomer) {
-          alert("Please select a customer before checking out.");
-          return;
-        }
-
-        // Simply redirect — do NOT create an order yet
-        window.location.href = `checkout.html?customer_id=${currentCustomer}`;
-      });
-    }
-  }
+  handleCheckout();
+}
 
 // ─────────────────────────────────────────────────────────────
-// 1. Load and build the “Active Customer” dropdown
+// 1. Load and build the "Active Customer" dropdown
 // ─────────────────────────────────────────────────────────────
 function loadCustomers() {
   fetch(`${BASE_URL}/customers`)
@@ -45,29 +33,35 @@ function loadCustomers() {
         select.appendChild(opt);
       });
 
-      // Set initial customer
+      // Restore selected customer from localStorage if available
+      const savedCustomer = localStorage.getItem("selectedCustomer");
+      if (savedCustomer && customers.includes(savedCustomer)) {
+        select.value = savedCustomer;
+      }
+
       currentCustomer = select.value;
       document.getElementById("current-customer").textContent = currentCustomer;
 
+      // Save to localStorage on change
       select.addEventListener("change", () => {
         currentCustomer = select.value;
+        localStorage.setItem("selectedCustomer", currentCustomer);
         document.getElementById("current-customer").textContent = currentCustomer;
         loadCart();
       });
 
-      // Initial load of cart
+      // Load cart for selected customer
       loadCart();
     })
     .catch(err => {
       console.error("Error loading customers:", err);
       currentCustomer = "guest";
       document.getElementById("current-customer").textContent = currentCustomer;
-      loadCart();
     });
 }
 
 // ─────────────────────────────────────────────────────────────
-// 2. Load and build the “Choose Catalogue” dropdown
+// 2. Load and build the "Choose Catalogue" dropdown
 // ─────────────────────────────────────────────────────────────
 function loadCatalogues() {
   fetch(`${BASE_URL}/catalogues`)
@@ -76,7 +70,7 @@ function loadCatalogues() {
       const select = document.getElementById("catalogue-select");
       select.innerHTML = "";
 
-      // Add an “All Products” option
+      // Add an "All Products" option
       const allOpt = document.createElement("option");
       allOpt.value = "ALL";
       allOpt.textContent = "All Products";
@@ -90,7 +84,7 @@ function loadCatalogues() {
         select.appendChild(opt);
       });
 
-      // Set initial catalogue to “All”
+      // Set initial catalogue to "All"
       currentCatalogue = "ALL";
 
       select.addEventListener("change", () => {
@@ -103,14 +97,14 @@ function loadCatalogues() {
     })
     .catch(err => {
       console.error("Error loading catalogues:", err);
-      // If error, default to “All Products”
+      // If error, default to "All Products"
       currentCatalogue = "ALL";
       loadProducts();
     });
 }
 
 // ─────────────────────────────────────────────────────────────
-// 3. Load products for the chosen catalogue (or all if “ALL”)
+// 3. Load products for the chosen catalogue (or all if "ALL")
 // ─────────────────────────────────────────────────────────────
 function loadProducts() {
   let url;
@@ -162,7 +156,7 @@ function loadProducts() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 4. Load the current customer’s cart items
+// 4. Load the current customer's cart items
 // ─────────────────────────────────────────────────────────────
 function loadCart() {
   if (!currentCustomer) return;
@@ -177,27 +171,51 @@ function loadCart() {
 
       if (!Array.isArray(items) || items.length === 0) {
         cartDiv.innerHTML = "<p>Your cart is empty.</p>";
+        updateCartTotal(0);
         return;
       }
 
+      let total = 0;
       items.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        
         const div = document.createElement("div");
         div.className = "cart-item";
         div.innerHTML = `
-          <strong>${item.name}</strong> – $${item.price.toFixed(2)} × ${item.quantity}
+          <div>
+            <strong>${item.name}</strong><br>
+            <small>$${item.price.toFixed(2)} × ${item.quantity}</small>
+          </div>
+          <div>$${itemTotal.toFixed(2)}</div>
         `;
         cartDiv.appendChild(div);
       });
+
+      updateCartTotal(total);
     })
     .catch(err => {
       console.error("Error loading cart:", err);
       document.getElementById("cart-list").innerHTML =
         "<p>Failed to load cart.</p>";
+      updateCartTotal(0);
     });
 }
 
+function updateCartTotal(total) {
+  const totalElement = document.getElementById("total-amount");
+  totalElement.textContent = `$${total.toFixed(2)}`;
+  
+  // Enable/disable checkout button based on cart total
+  const checkoutBtn = document.getElementById("checkout-button");
+  if (checkoutBtn) {
+    checkoutBtn.disabled = total <= 0;
+    checkoutBtn.style.opacity = total <= 0 ? "0.5" : "1";
+  }
+}
+
 // ─────────────────────────────────────────────────────────────
-// 5. Add a product to the current customer’s cart
+// 5. Add a product to the current customer's cart
 // ─────────────────────────────────────────────────────────────
 function addToCart(productId) {
   if (!currentCustomer) {
@@ -219,5 +237,28 @@ function addToCart(productId) {
     .catch(err => {
       console.error("Error adding to cart:", err);
       alert("Could not add to cart. See console for details.");
+    });
+}
+
+// ─────────────────────────────────────────────────────────────
+// 6. Handle checkout
+// ─────────────────────────────────────────────────────────────
+
+async function handleCheckout() {
+    const checkoutButton = document.getElementById('checkout-button');
+    if (!checkoutButton) return;
+
+    checkoutButton.addEventListener('click', () => {
+        // Get the current customer ID
+        const customerSelect = document.getElementById('customer-select');
+        const customerId = customerSelect.value;
+        
+        if (!customerId) {
+            alert('Please select a customer first');
+            return;
+        }
+
+        // Redirect to checkout page with customer ID
+        window.location.href = `checkout.html?customerId=${customerId}`;
     });
 }

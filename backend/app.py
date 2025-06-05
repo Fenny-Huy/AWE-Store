@@ -1,11 +1,15 @@
 from flask      import Flask, jsonify, request
 from flask_cors import CORS
-import json
+import random
+import string
 
 from models.database           import DatabaseManager
 from models.customer           import Customer
 from models.product            import Product
 from models.product_catalogue  import ProductCatalogue
+
+from models.admin              import Admin
+from models.sales_analytics    import SalesAnalytics
 
 from models.order import Order
 
@@ -66,9 +70,29 @@ if cust_table:
 else:
     dbm.create_table("customers", ["customer_id","account_id"])
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 3. Load ADMIN instances from 'admins.csv'
+# ─────────────────────────────────────────────────────────────────────────────
+admins_table = dbm.get_table("admins")
+all_admins = {}  # map email -> Admin instance
+
+if admins_table:
+    for row in admins_table.rows:
+        acct_id = row["account_id"]
+        pwd     = row["password"]
+        try:
+            admin_obj = Admin(acct_id, pwd)       # loads name, email from accounts.csv
+            all_admins[admin_obj.email] = admin_obj
+        except ValueError:
+            # Skip if account_id not found in accounts.csv 
+            pass
+else:
+    # If no 'admins.csv', create an empty one with the correct header
+    dbm.create_table("admins", ["account_id","email","password"])
+
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. Load PRODUCT_CATALOGUE instances from 'product_catalogues.csv'
+# 4. Load PRODUCT_CATALOGUE instances from 'product_catalogues.csv'
 # ─────────────────────────────────────────────────────────────────────────────
 pc_table = dbm.get_table("product_catalogues")
 # Map of catalogue_id -> {"name": <str>, "product_ids": [ ... ]}
@@ -102,7 +126,7 @@ for cat_id, info in catalogue_map.items():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. API ROUTES
+# 5. API ROUTES
 # ─────────────────────────────────────────────────────────────────────────────
 
 @app.route("/api/products", methods=["GET"])
@@ -199,27 +223,55 @@ def checkout():
     
     customer_id = data["customerId"]
     cust = all_customers[customer_id]
-    cart_items = cust.get_cart().get_cart_items()
+    cart_items = cust.get_cart()
+
+    total_cost = sum(all_products_dict[item["product_id"]].price * item["quantity"] for item in cart_items)
+
+    payment_details = data.get("payment_details", {})
+
+    order_id = "O" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
     order = Order(
-        order_id=data["orderId"],
+        order_id,
         customer_id=customer_id,
         items=cart_items,
-        total_cost=data["totalCost"]
+        total_cost=total_cost
     )
 
-    success = order.make_payment(data["paymentMethod"])
+    success = order.make_payment(data["paymentMethod"], payment_details)
     
     if success:
-        order_table.add_row({
-            "order_id": order.order_id,
-            "customer_id": order.customer_id,
-            "total_cost": order.total_cost,
-            "items": json.dumps(order.items)
-        })
-        return jsonify({"message": "Payment successful!"})
+        return jsonify({"status": "success", "message": "Payment successful!"})
     else:
-        return jsonify({"message": "Payment failed."}), 400
+        return jsonify({"status": "fail", "message": "Payment failed."}), 400
+
+
+@app.route("/api/admin/login", methods=["POST"])
+def admin_login():
+    """
+    Body: { "email": "...", "password": "..." }
+    Check against instantiated Admin objects in all_admins.
+    """
+    data = request.get_json()
+    if not data or "email" not in data or "password" not in data:
+        return jsonify({ "error": "Missing email or password" }), 400
+
+    email = data["email"]
+    pwd   = data["password"]
+
+    # Look up that email in our in-memory admin dictionary
+    admin_obj = all_admins.get(email)
+    if not admin_obj or not admin_obj.check_password(pwd):
+        return jsonify({ "error": "Invalid credentials" }), 401
+
+    return jsonify({ "message": "Login successful" }), 200
+
+
+@app.route("/api/admin/sales", methods=["GET"])
+def get_sales_summary():
+    analytics = SalesAnalytics()
+    summary = analytics.generate_summary()
+    return jsonify(summary), 200
     
 
 # ─────────────────────────────────────────────────────────────────────────────

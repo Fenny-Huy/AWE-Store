@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin – Sales Analytics</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const loggedIn = localStorage.getItem("isAdminLoggedIn");
+      if (loggedIn !== "true") {
+        // Not logged in → go back to login page
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+  <script defer src="js/admin.js"></script>
+</head>
+<body>
+  <h1>Sales Analytics (Admin View)</h1>
+
+  <section id="summary-section">
+    <h2>Overall Summary</h2>
+    <div>Total Orders: <span id="total-orders">–</span></div>
+    <div>Total Revenue: $<span id="total-revenue">–</span></div>
+  </section>
+
+  <section id="product-sales-section">
+    <h2>Product Sales</h2>
+    <table id="product-sales-table">
+      <thead>
+        <tr>
+          <th>Product ID</th>
+          <th>Product Name</th>
+          <th>Quantity Sold</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Rows inserted by admin.js -->
+      </tbody>
+    </table>
+  </section>
+
+  <p>
+    <button id="logout-button" style="margin-top:1em;">
+      Log Out
+    </button>
+  </p>
+</body>
+</html>

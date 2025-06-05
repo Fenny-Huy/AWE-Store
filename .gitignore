@@ -1,2 +1,5 @@
-/backend/models/__pycache__/
-/backend/__pycache__/
+backend/models/__pycache__/
+backend/__pycache__/
+backend/models/payment_listeners/__pycache__/
+backend/models/payment_strategies/__pycache__/
+*.pyc
