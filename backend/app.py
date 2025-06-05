@@ -176,10 +176,10 @@ def view_cart(customer_id):
         return jsonify({ "error": f"Customer '{customer_id}' not found" }), 404
 
     cust = all_customers[customer_id]
-    # raw_items = cust.get_cart().get_cart_items()
-    from models.shopping_cart import ShoppingCart
-    fresh_cart = ShoppingCart(customer_id)
-    raw_items = fresh_cart.get_cart_items()
+    raw_items = cust.get_cart().get_cart_items()
+    # from models.shopping_cart import ShoppingCart
+    # fresh_cart = ShoppingCart(customer_id)
+    # raw_items = fresh_cart.get_cart_items()
     detailed = []
     for entry in raw_items:
         pid = entry["product_id"]
@@ -209,11 +209,11 @@ def add_to_cart(customer_id):
         return jsonify({ "error": f"Product ID '{pid}' not found" }), 404
 
     cust = all_customers[customer_id]
-    # cust.get_cart().add_to_cart(all_products_dict[pid], qty)
+    cust.get_cart().add_to_cart(all_products_dict[pid], qty)
 
-    from models.shopping_cart import ShoppingCart
-    fresh_cart = ShoppingCart(customer_id)
-    fresh_cart.add_to_cart(all_products_dict[pid], qty)
+    # from models.shopping_cart import ShoppingCart
+    # fresh_cart = ShoppingCart(customer_id)
+    # fresh_cart.add_to_cart(all_products_dict[pid], qty)
     return jsonify({ "message": "Product added to cart" }), 200
 
 
