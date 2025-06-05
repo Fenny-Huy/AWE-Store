@@ -8,9 +8,9 @@ from models.database import DatabaseManager
 import json
 
 class Order():
-    def __init__(self, order_id, customer_id, items, total_cost):
+    def __init__(self, order_id, customer, items, total_cost):
         self.order_id = order_id
-        self.customer_id = customer_id
+        self.customer = customer
         self.items = items.get_cart_items() if hasattr(items, 'get_cart_items') else items
         self.total_cost = total_cost
         self.invoice = None
@@ -34,7 +34,7 @@ class Order():
             # Save order data
             order_table.add_row({
                 "order_id": self.order_id,
-                "customer_id": self.customer_id,
+                "customer_id": self.customer.get_customer_id(),
                 "total_cost": self.total_cost,
                 "items": json.dumps(self.items),  # items is already a list
                 "status": self.status
@@ -78,7 +78,7 @@ class Order():
                 observer.notify_all(self.order_id)
 
                 #Clear shopping cart only once order has been saved
-                ShoppingCart(self.customer_id).clear_cart()
+                self.customer.get_cart().clear_cart()
                 return True
             else:
                 print("Error: Order payment successful but failed to save order.")
@@ -94,7 +94,7 @@ class Order():
         
         invoice = {
             "order_id": self.order_id,
-            "customer_id": self.customer_id,
+            "customer_id": self.customer.get_customer_id(),
             "items": self.items,  # Now it's a list that can be JSON serialized
             "total_cost": self.total_cost,
             "status": self.status,

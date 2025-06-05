@@ -49,7 +49,7 @@ class Customer(Account):
         # Create new order
         order = Order(
             order_id=order_id,
-            customer_id=self.customer_id,
+            customer=self,
             items=cart,
             total_cost=total_cost
         )

@@ -233,7 +233,7 @@ def checkout():
 
     order = Order(
         order_id,
-        customer_id=customer_id,
+        customer=cust,
         items=cart_items,
         total_cost=total_cost
     )
