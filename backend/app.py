@@ -223,7 +223,7 @@ def checkout():
     
     customer_id = data["customerId"]
     cust = all_customers[customer_id]
-    cart_items = cust.get_cart()
+    cart_items = cust.get_cart().get_cart_items()
 
     total_cost = sum(all_products_dict[item["product_id"]].price * item["quantity"] for item in cart_items)
 

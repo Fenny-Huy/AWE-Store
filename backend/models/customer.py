@@ -31,7 +31,7 @@ class Customer(Account):
 
     def get_cart(self):
         self.shopping_cart.reload_cart()
-        return self.shopping_cart.get_cart_items()
+        return self.shopping_cart
         # return ShoppingCart(self.customer_id)
 
     def get_role(self) -> str:
