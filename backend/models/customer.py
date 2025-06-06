@@ -21,7 +21,12 @@ class Customer(Account):
         table = dbm.get_table("customers")
         if table is None:
             raise ValueError("Table 'customers' does not exist")
-
+        row = table.get_row_by_column_value("customer_id", self.customer_id)
+        account_id = row['account_id']
+        table = dbm.get_table("accounts")
+        row = table.get_row_by_column_value("account_id", account_id)
+        self.email = row['email']
+        self.name = row['name']
     
 
         # Initialize this customer's cart
@@ -94,24 +99,10 @@ class Customer(Account):
         return self.customer_id
     
     def get_email(self) -> str:
-        dbm = DatabaseManager()
-        table = dbm.get_table("customers")
-        row = table.get_row_by_column_value("customer_id", self.customer_id)
-        account_id = row['account_id']
-        table = dbm.get_table("accounts")
-        row = table.get_row_by_column_value("account_id", account_id)
-        email = row['email']
-        return email
+        return self.email
     
     def get_name(self) -> str:
-        dbm = DatabaseManager()
-        table = dbm.get_table("customers")
-        row = table.get_row_by_column_value("customer_id", self.customer_id)
-        account_id = row['account_id']
-        table = dbm.get_table("accounts")
-        row = table.get_row_by_column_value("account_id", account_id)
-        name = row['name']
-        return name
+        return self.name
 
     
 
