@@ -1,7 +1,6 @@
 catalogue_id,name,product_id
-1,Organic,2
-1,Organic,5
-2,Discounted,1
-2,Discounted,3
-3,Dairy,3
-3,Dairy,5
+1,Mobile,1
+2,Computers,2
+2,Computers,5
+3,Audio,3
+4,Accessories,4
