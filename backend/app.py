@@ -241,7 +241,13 @@ def checkout():
     success = order.make_payment(data["paymentMethod"], payment_details)
     
     if success:
-        return jsonify({"status": "success", "message": "Payment successful!"})
+        # Get the invoice info which now includes receipt and shipping details
+        receipt_info = order.invoice_info
+        return jsonify({
+            "status": "success",
+            "message": f"Payment successful! Receipt sent to {receipt_info['customer_email']}",
+            "receipt": receipt_info
+        })
     else:
         return jsonify({"status": "fail", "message": "Payment failed."}), 400
 

@@ -134,7 +134,33 @@ function submitPayment(method) {
     .then(res => res.json())
     .then(data => {
       if (data.status === "success") {
-        alert("Payment successful!");
+        // Format receipt details for alert
+        const receipt = data.receipt;
+        console.log(receipt.items);
+        const receiptMessage = `
+Payment Successful!
+
+Order Details:
+-------------
+Order ID: ${receipt.order_id}
+Customer: ${receipt.customer_name}
+Email: ${receipt.customer_email}
+Date: ${receipt.timestamp}
+
+Items:
+------
+${receipt.items.map(item => `${item.name} x${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`).join('\n')}
+
+Total: $${receipt.total_cost.toFixed(2)}
+
+Shipping Details:
+---------------
+Status: ${receipt.shipping_details.status}
+Estimated Delivery: ${receipt.shipping_details.estimated_delivery}
+
+A copy of this receipt has been sent to ${receipt.customer_email}
+`;
+        alert(receiptMessage);
         window.location.href = "index.html";
       } else {
         alert("Payment failed.");

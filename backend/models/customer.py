@@ -65,9 +65,22 @@ class Customer(Account):
             # Clear the cart after successful payment
             cart.clear_cart()
             return {
-                "success": True,
-                "invoice": order.invoice_info,
-                "message": "Payment successful"
+                "status": "success",
+                "message": f"Payment successful! Receipt sent to {self.get_email()}",
+                "receipt": {
+                    "order_id": order_id,
+                    "customer_id": self.customer_id,
+                    "customer_name": self.name,
+                    "customer_email": self.email,
+                    "items": cart.get_cart_items(),
+                    "total_cost": total_cost,
+                    "status": "Paid",
+                    "timestamp": order.timestamp,
+                    "shipping_details": {
+                        "status": "Processing",
+                        "estimated_delivery": order.estimated_delivery
+                    }
+                }
             }
         
         return {
@@ -80,6 +93,25 @@ class Customer(Account):
     def get_customer_id(self) -> str:
         return self.customer_id
     
+    def get_email(self) -> str:
+        dbm = DatabaseManager()
+        table = dbm.get_table("customers")
+        row = table.get_row_by_column_value("customer_id", self.customer_id)
+        account_id = row['account_id']
+        table = dbm.get_table("accounts")
+        row = table.get_row_by_column_value("account_id", account_id)
+        email = row['email']
+        return email
+    
+    def get_name(self) -> str:
+        dbm = DatabaseManager()
+        table = dbm.get_table("customers")
+        row = table.get_row_by_column_value("customer_id", self.customer_id)
+        account_id = row['account_id']
+        table = dbm.get_table("accounts")
+        row = table.get_row_by_column_value("account_id", account_id)
+        name = row['name']
+        return name
 
     
 

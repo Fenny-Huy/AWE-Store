@@ -59,8 +59,18 @@ class ShoppingCart:
         
         #Return a list of dicts [{"product_id": "...", "quantity": N}, ...]
         #representing this customer's cart.
+        # [{"product_id": pid, "quantity": qty} for pid, qty in self.items.items()]
+        dbm = DatabaseManager()
+        table = dbm.get_table("carts")
+        cart_items = []
+        for pid, qty in self.items.items():
+            product = table.get_row_by_column_value("product_id", pid)
+            table = dbm.get_table("products")
+            product_name = table.get_row_by_column_value("product_id", pid)['name']
+            product_price = table.get_row_by_column_value("product_id", pid)['price']
+            cart_items.append({"product_id": pid, "quantity": qty, "name": product_name, "price": product_price})
         
-        return [{"product_id": pid, "quantity": qty} for pid, qty in self.items.items()]
+        return cart_items
     
     def clear_cart(self):
         
