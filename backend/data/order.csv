@@ -1,4 +1,11 @@
 order_id,customer_id,total_cost,items,status
+1749056805401-C001,C001,18.96,"[{""product_id"": ""3"", ""quantity"": 4}, {""product_id"": ""2"", ""quantity"": 1}, {""product_id"": ""5"", ""quantity"": 1}, {""product_id"": ""1"", ""quantity"": 1}]",Paid
+1749101213064-C002,C002,26,"[{""product_id"": ""2"", ""quantity"": 2}, {""product_id"": ""5"", ""quantity"": 1}, {""product_id"": ""1"", ""quantity"": 1}, {""product_id"": ""4"", ""quantity"": 1}]",Paid
+1749102078882-C001,C001,12.48,"[{""product_id"": ""2"", ""quantity"": 1}, {""product_id"": ""5"", ""quantity"": 1}, {""product_id"": ""3"", ""quantity"": 1}]",Paid
+1749102392119-C001,C001,12.48,"[{""product_id"": ""2"", ""quantity"": 1}, {""product_id"": ""3"", ""quantity"": 1}, {""product_id"": ""1"", ""quantity"": 1}]",Paid
+1749102584755-C001,C001,4.99,"[{""product_id"": ""2"", ""quantity"": 1}, {""product_id"": ""3"", ""quantity"": 1}]",Paid
+1749102599197-C001,C001,10.49,"[{""product_id"": ""2"", ""quantity"": 1}, {""product_id"": ""3"", ""quantity"": 1}, {""product_id"": ""5"", ""quantity"": 1}]",Paid
+1749103206076-C002,C002,11.5,"[{""product_id"": ""2"", ""quantity"": 2}, {""product_id"": ""5"", ""quantity"": 1}]",Paid
 ON0TMWB,C002,1.99,"[{""product_id"": ""3"", ""quantity"": 1}]",Paid
 O3U15WD,C001,8.0,"[{""product_id"": ""1"", ""quantity"": 1}, {""product_id"": ""5"", ""quantity"": 1}]",Paid
 ORUBCFI,C001,3.0,"[{""product_id"": ""2"", ""quantity"": 1}]",Paid
