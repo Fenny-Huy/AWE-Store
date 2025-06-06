@@ -66,7 +66,7 @@ class Customer(Account):
             cart.clear_cart()
             return {
                 "success": True,
-                "invoice": order.invoice,
+                "invoice": order.invoice_info,
                 "message": "Payment successful"
             }
         

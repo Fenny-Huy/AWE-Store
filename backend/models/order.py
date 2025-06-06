@@ -5,6 +5,7 @@ from models.payment_observer import observer
 from models.shopping_cart import ShoppingCart  
 from datetime import datetime
 from models.database import DatabaseManager
+from models.invoice import Invoice
 import json
 
 class Order():
@@ -13,7 +14,7 @@ class Order():
         self.customer = customer
         self.items = items.get_cart_items() if hasattr(items, 'get_cart_items') else items
         self.total_cost = total_cost
-        self.invoice = None
+        self.invoice_info = None
         self.status = "Pending"
         
 
@@ -49,7 +50,7 @@ class Order():
         #Process payment using the specified payment method.
         #payment_method should be one of: 'credit', 'bank', 'thirdparty'
         
-        if self.invoice is None:
+        if self.invoice_info is None:
             self.create_invoice()
 
         method = payment_method.lower()
@@ -92,12 +93,20 @@ class Order():
         #Creates an invoice for the order containing all relevant details.
         #Returns a dictionary with order information.
         
-        invoice = {
-            "order_id": self.order_id,
-            "customer_id": self.customer.get_customer_id(),
-            "items": self.items,  # Now it's a list that can be JSON serialized
-            "total_cost": self.total_cost,
-            "status": self.status,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-        return invoice
+        # invoice = {
+        #     "order_id": self.order_id,
+        #     "customer_id": self.customer.get_customer_id(),
+        #     "items": self.items,  # Now it's a list that can be JSON serialized
+        #     "total_cost": self.total_cost,
+        #     "status": self.status,
+        #     "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # }
+
+        invoice = Invoice(
+            order_id= self.order_id,
+            customer_id= self.customer.get_customer_id(),
+            items=self.items,
+            total_cost=self.total_cost,
+            status=self.status
+        )
+        return invoice.return_info()
